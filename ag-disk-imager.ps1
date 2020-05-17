@@ -37,4 +37,32 @@ function Get-InternalDiskNumber {
   return $InternalDiskNumbers[0]
 }
 
+function Set-PowerSchemeToHigh {
+  Write-Host "`n[ Setting Power Scheme to HIGH... ]" -ForegroundColor Cyan
+  powercfg /s 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+}
+
+function Show-ApplicationTitle {
+  $title =@"
+                              __
+  The                /\    .-" /
+    - AG -          /  ; .'  .' 
+  Disk Imager      :   :/  .'   
+                    \  ;-.'     
+        .--""""--..__/     `.    
+      .'           .'    `o  \   
+    /                    `   ;  
+    :                  \      :  
+  .-;        -.         `.__.-'  
+:  ;          \     ,   ;       
+'._:           ;   :   (        
+    \/  .__    ;    \   `-.     
+      ;     "-,/_..--"`-..__)    
+      '""--.._:
+"@
+  
+    write-host " "
+    Write-Host $title -ForegroundColor DarkYellow
+}
+
 main
