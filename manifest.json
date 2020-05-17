@@ -1,0 +1,10 @@
+{
+  "20G80001AU": {
+    "home": "abc",
+    "enterprise": "def"
+  },
+  "SOMEMODEL": {
+    "home": "hij",
+    "enterprise": "klm"
+  }
+}
