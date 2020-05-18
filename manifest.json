@@ -1,10 +1,11 @@
 {
   "20G80001AU": {
-    "home": "abc",
-    "enterprise": "def"
+    "Win10-Home": "abc",
+    "Win10-Enterprise": "def",
+    "Factory": "hij"
   },
   "SOMEMODEL": {
-    "home": "hij",
-    "enterprise": "klm"
+    "Win10-Home": "hij",
+    "Win10-Enterprise": "klm"
   }
 }

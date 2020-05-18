@@ -1,6 +1,54 @@
+$manifest = Get-Content -Raw -Path .\manifest.json | ConvertFrom-Json
+$settings = Get-Content -Raw -Path .\settings.json | ConvertFrom-Json
+$script:machineModel = ""
+$script:selectedOption = ""
+[System.Collections.ArrayList]$script:imageNames = @('0')
 function main {
+  #Show-ApplicationTitle
+  #Set-PowerSchemeToHigh
   Get-MachineModel
-  Test-DriversForMachineModelExist
+  #Test-DriversForMachineModelExist
+  #Write-Host $manifest."20G80001AU"."home"
+  Get-ImageMenuForDevice
+  #New-ImageJob
+  #$manifest."20G80001AU"
+
+}
+
+function Get-ImageMenuForDevice {
+  $counter = 0
+
+  $manifest.$script:machineModel.PSObject.Properties | ForEach-Object {
+    $script:imageNames.Add($_.Name) | Out-Null
+  }
+  #$imageNames.Add('Exit') | Out-Null
+
+  Write-Host "`nMenu" -ForegroundColor Magenta
+  Write-Host "++++" -ForegroundColor Gray
+  
+  Foreach ($img in $script:imageNames) {
+
+    if ($img -ne '0'){
+      Write-Host "[$counter] $img" -ForegroundColor DarkYellow
+    }
+    $counter++
+  }
+  #$script:imageNames
+  $script:selectedOption = Read-Host "`nSelect image option and hit enter or punch CTRL-C to exit`n" 
+  New-ImageJob
+}
+
+function New-ImageJob{
+
+  $imgName = $script:imageNames[[int]$script:selectedOption]
+  Write-Host $manifest.$script:machineModel.$imgName
+
+  return
+  try {  
+    $manifest.$script:machineModel.$imgName
+  } catch {
+    Write-Host "bad option"
+  }
 }
 
 function Get-MachineModel{
@@ -12,7 +60,7 @@ function Get-MachineModel{
 function Test-DriversForMachineModelExist{
   Get-Location | Write-Host
   Write-Host "`n[ Checking for drivers... ]" -ForegroundColor Cyan
-  [bool] $isDriversForModel = Test-Path -Path "$script:driversPath\$script:machineModel"
+  [bool] $isDriversForModel = Test-Path -Path "$settings.'driversPath'\$script:machineModel"
   if($isDriversForModel -ne 1){
     throw "ERROR: No drivers for $script:machineModel found. Script must exit."
   }
@@ -35,6 +83,49 @@ function Get-InternalDiskNumber {
     throw "ERROR: No internal disk found for imaging. Script must exit."
   }
   return $InternalDiskNumbers[0]
+}
+
+function New-DiskPartitions{
+
+  $internalDisk = Get-InternalDiskNumber
+
+  $efiLayout = @"
+select disk $internalDisk
+clean
+convert gpt
+create partition efi size=260
+format fs=fat32 quick
+assign letter=s
+create partition msr size=128
+create partition primary
+format fs=ntfs quick label=WINDOWS
+assign letter=W
+"@
+
+  $mbrLayout = @"
+select disk $internalDisk
+clean
+convert mbr
+create partition primary
+format fs=ntfs quick label=WINDOWS
+active
+assign letter=W
+"@
+
+  New-Item -Name disklayout.txt -ItemType File -Force | OUT-NULL
+
+  if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
+    Add-Content –Path disklayout.txt $efiLayout
+  } else {
+    Add-Content –path disklayout.txt $mbrLayout
+  }
+
+  Write-Host "`n[ Writing disk layout... ]" -ForegroundColor Cyan
+
+  $command = "diskpart /s disklayout.txt"  
+  Invoke-Expression $command
+
+  Write-Host "[ >> Disk layout complete << ]" -ForegroundColor DarkYellow
 }
 
 function Set-PowerSchemeToHigh {
