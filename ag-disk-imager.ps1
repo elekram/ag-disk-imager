@@ -1,71 +1,166 @@
 $manifest = Get-Content -Raw -Path .\manifest.json | ConvertFrom-Json
-$settings = Get-Content -Raw -Path .\settings.json | ConvertFrom-Json
+
+$script:driversPath = ".\drivers"
+$script:wimPath = ".\wim"
 $script:machineModel = ""
 $script:selectedOption = ""
+$script:manifestConfig = ""
 [System.Collections.ArrayList]$script:imageNames = @('0')
 function main {
-  #Show-ApplicationTitle
-  #Set-PowerSchemeToHigh
+  Show-ApplicationTitle
+  Set-PowerSchemeToHigh
   Get-MachineModel
-  #Test-DriversForMachineModelExist
-  #Write-Host $manifest."20G80001AU"."home"
+  Test-ManifestForModel
+  Test-WimFolder
+  Test-DriversForMachineModelExist
   Get-ImageMenuForDevice
-  #New-ImageJob
-  #$manifest."20G80001AU"
-
+  Write-Host "[ >> Finished! <<]" -ForegroundColor Green
 }
 
+function Test-ManifestForModel{
+  if(![bool]($manifest.PSobject.Properties.name -Match $script:machineModel)){
+    Write-Host "[ Error: Machine model not found in manifest. Script will now exit. ]" -ForegroundColor DarkRed
+    exit
+  }
+}
 function Get-ImageMenuForDevice {
   $counter = 0
+  $manifestConfig = $manifest.$script:machineModel."config"
 
-  $manifest.$script:machineModel.PSObject.Properties | ForEach-Object {
-    $script:imageNames.Add($_.Name) | Out-Null
+  [System.Collections.ArrayList]$script:imageNames = @('0')
+  
+  switch ($manifestConfig) {
+    "defaults" {
+      $manifest."defaults".PSObject.Properties | ForEach-Object {
+        $script:imageNames.Add($_.Name) | Out-Null
+      }
+    }
+    "append" {
+      $manifest."defaults".PSObject.Properties | ForEach-Object {
+        $script:imageNames.Add($_.Name) | Out-Null
+      }
+
+      $manifest.$script:machineModel.PSObject.Properties | ForEach-Object {
+        $script:imageNames.Add($_.Name) | Out-Null
+      }
+    }
+    "replace" {
+      $manifest.$script:machineModel.PSObject.Properties | ForEach-Object {
+        $script:imageNames.Add($_.Name) | Out-Null
+      }
+    }
   }
-  #$imageNames.Add('Exit') | Out-Null
 
   Write-Host "`nMenu" -ForegroundColor Magenta
   Write-Host "++++" -ForegroundColor Gray
   
   Foreach ($img in $script:imageNames) {
 
-    if ($img -ne '0'){
+    if ($img -ne 'config' -and $img -ne '0'){
       Write-Host "[$counter] $img" -ForegroundColor DarkYellow
     }
     $counter++
   }
-  #$script:imageNames
+
   $script:selectedOption = Read-Host "`nSelect image option and hit enter or punch CTRL-C to exit`n" 
   New-ImageJob
 }
 
 function New-ImageJob{
+  $imageFile = ""
+  # check if selected option is a number character
+  if($script:selectedOption -match '\d' -ne 1) {
+    Write-Host "Invalid option." -ForegroundColor DarkRed
+    Get-ImageMenuForDevice
+    return
+  }
 
   $imgName = $script:imageNames[[int]$script:selectedOption]
-  Write-Host $manifest.$script:machineModel.$imgName
+  #Write-Host $manifest.$script:machineModel.$imgName
+  if([string]::IsNullOrWhiteSpace($manifest.$script:machineModel.$imgName)){
+    if([string]::IsNullOrWhiteSpace($manifest."defaults".$imgName)){
+      Write-Host "Invalid option." -ForegroundColor DarkRed
+      Get-ImageMenuForDevice
+      return
+    }
+    $imageFile = $manifest."defaults".$imgName
+  } else {
+    $imageFile = $manifest.$script:machineModel.$imgName
+  }
+  
+  Set-InternalDrivePartitions
+  
+  Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
+  Expand-WindowsImage -ImagePath "$script:wimPath\$imageFile" -index 1 -ApplyPath "w:\" 
+  Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkGreen
+  Set-DriversOnImagedPartition
+  Set-BootLoader
 
-  return
-  try {  
-    $manifest.$script:machineModel.$imgName
-  } catch {
-    Write-Host "bad option"
+}
+
+function Set-DriversOnImagedPartition {
+  Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
+  Write-Host $script:driversPath\$script:machineModel
+  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$script:machineModel" -Recurse -ForceUnsigned
+  Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor DarkYellow
+}
+
+function Set-BootLoader{
+  if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
+    $efiCommand = "bcdboot w:\windows"
+    Invoke-Expression $efiCommand
+    Invoke-Expression $efiCommand
+    Invoke-Expression $efiCommand
+  } else {
+    $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
+    Invoke-Expression $biosCommand
   }
 }
+
 
 function Get-MachineModel{
   Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
   $script:machineModel = Get-ComputerInfo | Select-Object -ExpandProperty "csmodel*"
   $script:machineModel = "20G80001AU"
-  Write-Host "[ >> Found $script:machineModel << ]" -ForegroundColor DarkYellow
+  Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor DarkYellow
 }
 function Test-DriversForMachineModelExist{
-  Get-Location | Write-Host
   Write-Host "`n[ Checking for drivers... ]" -ForegroundColor Cyan
-  [bool] $isDriversForModel = Test-Path -Path "$settings.'driversPath'\$script:machineModel"
-  if($isDriversForModel -ne 1){
-    throw "ERROR: No drivers for $script:machineModel found. Script must exit."
+
+  [bool] $isDriversFolder = Test-Path -Path "$script:driversPath"
+  if($isDriversFolder -ne 1){
+    New-Item -Path $script:driversPath -ItemType Directory | OUT-NULL
+    Write-Host "[ >> Created missing drivers root folder << ]" -ForegroundColor DarkYellow
   }
-  Write-Host "`n[ >> Found drivers for $script:machineModel << ]" -ForegroundColor DarkYellow
-  Write-Host ""
+
+  [bool] $isDriversForModel = Test-Path -Path "$script:driversPath\$script:machineModel"
+  if($isDriversForModel -ne 1){
+    New-Item -Path "$script:driversPath\$script:machineModel" -ItemType Directory | OUT-NULL
+    Write-Host "[ >> Created drivers folder for $script:machineModel << ]" -ForegroundColor DarkYellow
+  }
+
+  $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$script:machineModel" | Measure-Object
+  if($driversDirectoryInfo.count -eq 0) {
+    Write-Host "[ Error: Please add drivers for model: $script:machineModel. Script will now exit ]" -ForegroundColor DarkRed
+    exit
+  }
+
+  Write-Host "[ >> Found drivers folder for $script:machineModel << ]" -ForegroundColor DarkYellow
+}
+
+function Test-WimFolder {
+  [bool] $isWimFolder = Test-Path -Path "$script:wimPath"
+  if($isWimFolder -ne 1){
+    New-Item -Path $script:wimPath -ItemType Directory | OUT-NULL
+    Write-Host "`n[ >> Created missing WIM folder << ]" -ForegroundColor DarkYellow
+  }
+
+  $wimDirectoryInfo = Get-ChildItem -Path "$script:wimPath" | Measure-Object
+  if($wimDirectoryInfo.count -eq 0) {
+    Write-Host "[ Error: No files in WIM directory. Script will now exit ]" -ForegroundColor DarkRed
+    exit
+  }
+
 }
 
 function Get-InternalDiskNumber {
@@ -76,17 +171,18 @@ function Get-InternalDiskNumber {
     $InternalDiskNumbers += $_.DeviceID.Substring($_.DeviceID.Length -1)
   }
   if ($InternalDiskNumbers.Count -gt 1){
-    throw "ERROR: Found more than one internal disk. Script must exit."
+    Write-Host "[ Error: Found more than one internal disk. Script must exit ]" -ForegroundColor DarkRed
+    exit
   }
 
   if ($InternalDiskNumbers.Count -eq 0) {
-    throw "ERROR: No internal disk found for imaging. Script must exit."
+    Write-Host "[ Error: No internal disk found for imaging. Script must exit ]" -ForegroundColor DarkRed
+    exit
   }
   return $InternalDiskNumbers[0]
 }
 
-function New-DiskPartitions{
-
+function Set-InternalDrivePartitions{
   $internalDisk = Get-InternalDiskNumber
 
   $efiLayout = @"
@@ -115,9 +211,9 @@ assign letter=W
   New-Item -Name disklayout.txt -ItemType File -Force | OUT-NULL
 
   if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
-    Add-Content –Path disklayout.txt $efiLayout
+    Add-Content -Path disklayout.txt $efiLayout
   } else {
-    Add-Content –path disklayout.txt $mbrLayout
+    Add-Content -Path disklayout.txt $mbrLayout
   }
 
   Write-Host "`n[ Writing disk layout... ]" -ForegroundColor Cyan
@@ -148,7 +244,7 @@ function Show-ApplicationTitle {
 :  ;          \     ,   ;       
 '._:           ;   :   (        
     \/  .__    ;    \   `-.     
-      ;     "-,/_..--"`-..__)    
+  bug ;     "-,/_..--"`-..__)    
       '""--.._:
 "@
   

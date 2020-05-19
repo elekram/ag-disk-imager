@@ -1,11 +1,14 @@
 {
+  "defaults": {
+    "Win10-Home": "win10-ent-1709-soe.wim",
+    "Win10-Enterprise": "win10-ent-1709-soe.wim",
+    "Factory": "win10-ent-1709-soe"
+  },
   "20G80001AU": {
-    "Win10-Home": "abc",
-    "Win10-Enterprise": "def",
-    "Factory": "hij"
+    "config":"append",
+    "Win8": "abc.wim"
   },
   "SOMEMODEL": {
-    "Win10-Home": "hij",
-    "Win10-Enterprise": "klm"
+    "config": "append"
   }
 }
