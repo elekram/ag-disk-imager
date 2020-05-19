@@ -76,7 +76,7 @@ function New-ImageJob{
   }
 
   $imgName = $script:imageNames[[int]$script:selectedOption]
-  #Write-Host $manifest.$script:machineModel.$imgName
+
   if([string]::IsNullOrWhiteSpace($manifest.$script:machineModel.$imgName)){
     if([string]::IsNullOrWhiteSpace($manifest."defaults".$imgName)){
       Write-Host "Invalid option." -ForegroundColor DarkRed
@@ -92,7 +92,7 @@ function New-ImageJob{
   
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$imageFile" -index 1 -ApplyPath "w:\" 
-  Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkGreen
+  Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow 
   Set-DriversOnImagedPartition
   Set-BootLoader
 
@@ -100,7 +100,6 @@ function New-ImageJob{
 
 function Set-DriversOnImagedPartition {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
-  Write-Host $script:driversPath\$script:machineModel
   Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$script:machineModel" -Recurse -ForceUnsigned
   Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor DarkYellow
 }
@@ -121,7 +120,7 @@ function Set-BootLoader{
 function Get-MachineModel{
   Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
   $script:machineModel = Get-ComputerInfo | Select-Object -ExpandProperty "csmodel*"
-  $script:machineModel = "20G80001AU"
+  #$script:machineModel = "20G80001AU"
   Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor DarkYellow
 }
 function Test-DriversForMachineModelExist{
