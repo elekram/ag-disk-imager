@@ -88,6 +88,17 @@ function New-ImageJob{
     $imageFile = $manifest.$script:machineModel.$imgName
   }
   
+  #check that wim exits before proceeding
+  Write-Host "$script:wimPath\$imageFile"
+  Write-Host "[ Checking WIM exists... ]" -ForegroundColor Cyan
+  if (Test-Path -Path "$script:wimPath\$imageFile" -PathType leaf) {
+    Write-Host "[ >> Found $imageFile << ]" -ForegroundColor DarkYellow 
+  } else {
+    Write-Host "[ Error: Could not locate $imageFile. Compare manifest and WIM folder. Script will not exit ]" -ForegroundColor DarkRed 
+    exit
+  }
+
+  return
   Set-InternalDrivePartitions
   
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
@@ -96,6 +107,10 @@ function New-ImageJob{
   Set-DriversOnImagedPartition
   Set-BootLoader
 
+}
+
+function Test-WimExists {
+  Test-Path
 }
 
 function Set-DriversOnImagedPartition {
