@@ -89,7 +89,6 @@ function New-ImageJob{
   }
   
   #check that wim exits before proceeding
-  Write-Host "$script:wimPath\$imageFile"
   Write-Host "[ Checking WIM exists... ]" -ForegroundColor Cyan
   if (Test-Path -Path "$script:wimPath\$imageFile" -PathType leaf) {
     Write-Host "[ >> Found $imageFile << ]" -ForegroundColor DarkYellow 
