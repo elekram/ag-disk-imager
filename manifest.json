@@ -2,13 +2,70 @@
   "defaults": {
     "Win10-Home": "win10-ent-1709-soe.wim",
     "Win10-Enterprise": "win10-ent-1709-soe.wim",
-    "Factory": "win10-ent-1709-soe"
+    "Factory": "win10-ent-1709-soe.wim"
+  },
+  "20DAS0L00": {
+    "config":"defaults"
+  },
+  "20G90003AU": {
+    "config":"defaults"
+  },
+  "20HTS00P00": {
+    "config":"defaults"
+  },
+  "20LRS04R00": {
+    "config":"defaults"
+  },
+  "24655U0": {
+    "config": "defaults"
+  },
+  "20M8000JAU": {
+    "config": "defaults"
+  },
+  "20M8S0YA00": {
+    "config": "defaults"
+  },
+  "20NTS00Q00": {
+    "config": "defaults"
+  },
+  "20NUS0K100": {
+    "config": "defaults"
   },
   "20G80001AU": {
-    "config":"append",
-    "Win8": "abc.wim"
+    "config": "defaults"
   },
-  "SOMEMODEL": {
-    "config": "append"
+  "20HSS01R00": {
+    "config": "defaults"
+  },
+  "20HSS03000": {
+    "config":"defaults"
+  },
+  "20LNS09W00": {
+    "config":"defaults"
+  },
+  "20LNS0KV00": {
+    "config":"defaults"
+  },
+  "20FE002XAU": {
+    "config":"defaults"
+  },
+  "20JJS1SF00": {
+    "config":"defaults"
+  },
+  "20LJA016AU": {
+    "config":"defaults"
+  },
+  "20NQS00V00": {
+    "config":"defaults"
+  },
+  "78564CM": {
+    "config": "replace",
+    "Win10-LoanLaptop": "l420_7856_4cm_loanlaptop.wim",
+    "Win1-NAPLAN": "l420_7856_4cm_naplan.wim"
+  },
+  "10M8S3CF00": {
+    "config": "replace",
+    "Win10-ThinkCenter-M710": "tc_m710s.wim",
+    "Win10-ThinkCenter-M710-NAPLAN": "tc_m710s_naplan.wim"
   }
 }

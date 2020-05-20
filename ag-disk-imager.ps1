@@ -7,14 +7,14 @@ $script:selectedOption = ""
 $script:manifestConfig = ""
 [System.Collections.ArrayList]$script:imageNames = @('0')
 function main {
-  Show-ApplicationTitle
-  Set-PowerSchemeToHigh
+  #Show-ApplicationTitle
+  #Set-PowerSchemeToHigh
   Get-MachineModel
-  Test-ManifestForModel
-  Test-WimFolder
-  Test-DriversForMachineModelExist
-  Get-ImageMenuForDevice
-  Write-Host "[ >> Finished! <<]" -ForegroundColor Green
+  #Test-ManifestForModel
+  #Test-WimFolder
+  #Test-DriversForMachineModelExist
+  #Get-ImageMenuForDevice
+  Write-Host "[ >> All Goood!! <<]" -ForegroundColor Green
 }
 
 function Test-ManifestForModel{
@@ -134,7 +134,7 @@ function Set-BootLoader{
 
 function Get-MachineModel{
   Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
-  $script:machineModel = Get-ComputerInfo | Select-Object -ExpandProperty "csmodel*"
+  $script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty "Model"
   #$script:machineModel = "20G80001AU"
   Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor DarkYellow
 }
