@@ -7,13 +7,13 @@ $script:selectedOption = ""
 $script:manifestConfig = ""
 [System.Collections.ArrayList]$script:imageNames = @('0')
 function main {
-  #Show-ApplicationTitle
-  #Set-PowerSchemeToHigh
+  Show-ApplicationTitle
+  Set-PowerSchemeToHigh
   Get-MachineModel
-  #Test-ManifestForModel
-  #Test-WimFolder
-  #Test-DriversForMachineModelExist
-  #Get-ImageMenuForDevice
+  Test-ManifestForModel
+  Test-WimFolder
+  Test-DriversForMachineModelExist
+  Get-ImageMenuForDevice
   Write-Host "[ >> All Goood!! <<]" -ForegroundColor Green
 }
 
@@ -98,7 +98,6 @@ function New-ImageJob{
     exit
   }
 
-  return
   Set-InternalDrivePartitions
   
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
@@ -107,10 +106,6 @@ function New-ImageJob{
   Set-DriversOnImagedPartition
   Set-BootLoader
 
-}
-
-function Test-WimExists {
-  Test-Path
 }
 
 function Set-DriversOnImagedPartition {
