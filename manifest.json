@@ -68,5 +68,7 @@
     "Win10-ThinkCenter-M710": "tc_m710s.wim",
     "Win10-ThinkCenter-M710-NAPLAN": "tc_m710s_naplan.wim"
   },
-  "TravelMate P446-M": "defaults"
+  "TravelMate P446-M": {
+    "config": "defaults"
+  }
 }
