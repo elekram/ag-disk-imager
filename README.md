@@ -48,6 +48,6 @@ AG needs the computer model(s) listed in a manifest.json as key values, the valu
 ```
 The 'config' attribute can also be set to *append* or *replace*. If set to *append* AG will list the 'defaults' wims and also machine specific WIMS specified under the machine's model name, while *replace* will only list the machine specific WIM options. 
 ## Drivers
-Place exported driver inf files into their respective model folder names in the 'drivers'f folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM.  
+Place exported driver inf files into their respective model folder names in the 'drivers' folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM.  
     
-So for the 'Acer TravelMate P449-M' model listen in the aforementioned exmaple manifest you would have a folder named 'Acer TravelMate P449-M' in the *drivers* folder with your exported drives inside.
+So for the 'Acer TravelMate P449-M' model listed in the aforementioned example manifest you would have a folder named 'Acer TravelMate P449-M' in the *drivers* folder with your exported drives inside.
