@@ -70,5 +70,11 @@
   },
   "TravelMate P446-M": {
     "config": "defaults"
+  },
+  "TravelMate P449-G3-M": {
+    "config": "defaults"
+  },
+  "TravelMate P449-M": {
+    "config": "defaults"
   }
 }

@@ -1,0 +1,7 @@
+# ignore all logs
+*.log
+# ignore drivers folder
+drivers/
+
+#ignore wim folder
+wim/

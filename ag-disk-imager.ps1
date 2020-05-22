@@ -1,5 +1,4 @@
 $manifest = Get-Content -Raw -Path .\manifest.json | ConvertFrom-Json
-
 $script:driversPath = ".\drivers"
 $script:wimPath = ".\wim"
 $script:machineModel = ""
@@ -55,7 +54,6 @@ function Get-ImageMenuForDevice {
   Write-Host "++++" -ForegroundColor Gray
   
   Foreach ($img in $script:imageNames) {
-
     if ($img -ne 'config' -and $img -ne '0'){
       Write-Host "[$counter] $img" -ForegroundColor DarkYellow
     }
@@ -104,12 +102,11 @@ function New-ImageJob{
   Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow 
   Set-DriversOnImagedPartition
   Set-BootLoader
-
 }
 
 function Set-DriversOnImagedPartition {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
-  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$script:machineModel" -Recurse -ForceUnsigned
+  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$script:machineModel" -Recurse -ForceUnsigned | Out-Null
   Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor DarkYellow
 }
 
@@ -129,7 +126,6 @@ function Set-BootLoader{
 function Get-MachineModel{
   Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
   $script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty "Model"
-  #$script:machineModel = "20G80001AU"
   Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor DarkYellow
 }
 function Test-DriversForMachineModelExist{
@@ -168,7 +164,6 @@ function Test-WimFolder {
     Write-Host "[ Error: No files in WIM directory. Script will now exit ]" -ForegroundColor DarkRed
     exit
   }
-
 }
 
 function Get-InternalDiskNumber {
@@ -256,8 +251,8 @@ function Show-ApplicationTitle {
       '""--.._:
 "@
   
-    write-host " "
-    Write-Host $title -ForegroundColor DarkYellow
+  write-host " "
+  Write-Host $title -ForegroundColor DarkYellow
 }
 
 main
