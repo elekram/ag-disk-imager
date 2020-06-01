@@ -7,7 +7,7 @@
     },
     "Factory Image": {
       "wim": "",
-      "drivers": "false",
+      "drivers": false,
       "unattend": ""
     }
   },
