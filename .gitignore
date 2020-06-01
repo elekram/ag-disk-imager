@@ -5,3 +5,6 @@ drivers/
 
 #ignore wim folder
 wim/
+
+#ignore unattend folder
+unattend/
