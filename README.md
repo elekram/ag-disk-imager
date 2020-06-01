@@ -76,7 +76,7 @@ The 'config' attribute can be set to *defaults*, *append* or *replace*. If set t
 
 Place exported driver inf files into their respective model folder names in the 'drivers' folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM.  
   
-So for the 'Acer TravelMate P449-M' model listed in the aforementioned example manifest you would have a folder named 'Acer TravelMate P449-M' in the *drivers* folder with your exported drivers inside. If you don't wish to inject drivers simply set the 'driver' key to **false** in its task.
+So for the 'Lenovo ThinkPad 11e Gen2' model listed in the aforementioned example manifest you would have a folder named '20DAS0L00' in the *drivers* folder with your exported drivers inside. If you don't wish to inject drivers simply set the 'driver' key to **false** in its task.
 
 ## Unattend
 
