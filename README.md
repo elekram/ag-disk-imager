@@ -32,7 +32,7 @@ ag-disk-imager.ps1 needs to be in a directory with a file named 'manifest.json' 
   
 ## manifest.json
 
-AG needs the computer model(s) listed in a manifest.json as key values, this value will be matched to the machines model number in its firmware (see JSON example below). It's from this information that AG will generate a menu for the user to select from when the script is first run.  
+AG needs the computer model(s) listed in a manifest.json as key values, this value will be matched to the machine's model number in its firmware (see JSON example below). It's from this information that AG will generate a menu for the user to select from when the script is first run.  
 
 Each machine model listed will contain an object which must contain a key for the device's full name, named 'name', a key called 'config' which defines the tasks which get dynamically added to the program menu, and a 'tasks' key which lists the different imaging tasks and their options. The 'tasks' key then needs another nested object with 'wim', 'drivers' and 'unattend' keys. See example below for a clearer understanding.  
 
