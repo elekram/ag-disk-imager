@@ -1,80 +1,130 @@
 {
   "defaults": {
-    "Win10-Home": "win10-ent-1709-soe.wim",
-    "Win10-Enterprise": "win10-ent-1709-soe.wim",
-    "Factory": "win10-ent-1709-soe.wim"
+    "Win10-1709-Enterprise": {
+      "wim": "win10-ent-1709-soe.wim",
+      "drivers": true,
+      "unattend": "cats.xml"
+    },
+    "Factory Image": {
+      "wim": "",
+      "drivers": "false",
+      "unattend": ""
+    }
   },
   "20DAS0L00": {
-    "config":"defaults"
+    "name": "Lenovo ThinkPad 11e Gen2",
+    "config": "defaults"
   },
   "20G90003AU": {
+    "name": "Lenovo ThinkPad 11e Gen3",
     "config":"defaults"
   },
   "20HTS00P00": {
+    "name": "Lenovo ThinkPad 11e Gen4",
     "config":"defaults"
   },
   "20LRS04R00": {
+    "name": "Lenovo ThinkPad 11e Gen5 (soldered SSD)",
     "config":"defaults"
   },
-  "24655U0": {
-    "config": "defaults"
-  },
   "20M8000JAU": {
+    "name": "Lenovo ThinkPad L380",
     "config": "defaults"
   },
   "20M8S0YA00": {
+    "name": "Lenovo ThinkPad L380",
     "config": "defaults"
   },
   "20NTS00Q00": {
+    "name": "Lenovo ThinkPad L390",
     "config": "defaults"
   },
   "20NUS0K100": {
+    "name": "Lenovo ThinkPad L390",
     "config": "defaults"
   },
   "20G80001AU": {
+    "name": "Lenovo ThinkPad Yoga 11e Gen3",
     "config": "defaults"
   },
   "20HSS01R00": {
+    "name": "Lenovo ThinkPad Yoga 11e Gen4",
     "config": "defaults"
   },
   "20HSS03000": {
+    "name": "Lenovo ThinkPad Yoga 11e Gen4",
     "config":"defaults"
   },
   "20LNS09W00": {
+    "name": "Lenovo ThinkPad Yoga 11e Gen5 (soldered ssd)",
     "config":"defaults"
   },
   "20LNS0KV00": {
+    "name": "Lenovo ThinkPad Yoga 11e Gen5",
     "config":"defaults"
   },
   "20FE002XAU": {
+    "name": "Lenovo ThinkPad Yoga 260",
     "config":"defaults"
   },
   "20JJS1SF00": {
+    "name": "Lenovo ThinkPad Yoga 370",
     "config":"defaults"
   },
   "20LJA016AU": {
+    "name": "Lenovo ThinkPad Yoga X380",
     "config":"defaults"
   },
   "20NQS00V00": {
+    "name": "Lenovo ThinkPad Yoga X390",
     "config":"defaults"
   },
+  "51012ISK": {
+    "name": "Lenovo MIIX 510",
+    "config": "defaults"
+  },
   "78564CM": {
+    "name": "Lenovo ThinkPad L420",
     "config": "replace",
-    "Win10-LoanLaptop": "l420_7856_4cm_loanlaptop.wim",
-    "Win1-NAPLAN": "l420_7856_4cm_naplan.wim"
+    "tasks": {
+      "Win10-Loan-Laptop": {
+        "wim": "l420_7856_4cm_loanlaptop.wim",
+        "drivers": false,
+        "unattend": ""
+      },
+      "Win10-NAPLAN": {
+        "wim": "l420_7856_4cm_naplan.wim",
+        "drivers": false,
+        "unattend": ""
+      }
+    }
   },
   "10M8S3CF00": {
+    "name": "Lenovo ThinkCentre m710s",
     "config": "replace",
-    "Win10-ThinkCenter-M710": "tc_m710s.wim",
-    "Win10-ThinkCenter-M710-NAPLAN": "tc_m710s_naplan.wim"
+    "tasks": {
+      "Win10 ThinkCenter-M710": {
+        "wim": "tc_m710s.wim",
+        "drivers": false,
+        "unattend": ""
+      },
+      "Win10 ThinkCenter-M710-NAPLAN": {
+        "wim": "tc_m710s_naplan.wim",
+        "drivers": false,
+        "unattend": ""
+      }
+    }
   },
   "TravelMate P446-M": {
+    "name": "TravelMate P446",
     "config": "defaults"
   },
   "TravelMate P449-G3-M": {
+    "name": "TravelMate P449",
     "config": "defaults"
   },
   "TravelMate P449-M": {
+    "name": "TravelMate P449",
     "config": "defaults"
   }
 }
