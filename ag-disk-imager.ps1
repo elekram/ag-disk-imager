@@ -321,7 +321,7 @@ function Get-InternalDiskNumber {
   return $InternalDiskNumbers[0]
 }
 
-function Set-MBR {
+function Clear-BootManagerEntries {
   $bcdOutput = (bcdedit /v) -join "`n"
   $entries = New-Object System.Collections.Generic.List[pscustomobject]]
   ($bcdOutput -split '(?m)^(.+\n-)-+\n' -ne '').ForEach({
