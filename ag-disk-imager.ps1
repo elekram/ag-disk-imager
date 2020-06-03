@@ -321,6 +321,31 @@ function Get-InternalDiskNumber {
   return $InternalDiskNumbers[0]
 }
 
+function Set-MBR {
+  $bcdOutput = (bcdedit /v) -join "`n"
+  $entries = New-Object System.Collections.Generic.List[pscustomobject]]
+  ($bcdOutput -split '(?m)^(.+\n-)-+\n' -ne '').ForEach({
+    if ($_.EndsWith("`n-")) { # entry header 
+      $entries.Add([pscustomobject] @{ Name = ($_ -split '\n')[0]; Properties = [ordered] @{} })
+    } else {  # block of property-value lines
+      ($_ -split '\n' -ne '').ForEach({
+        $propAndVal = $_ -split '\s+', 2 # split line into property name and value
+        if ($propAndVal[0] -ne '') { # [start of] new property; initialize list of values
+          $currProp = $propAndVal[0]
+          $entries[-1].Properties[$currProp] = New-Object Collections.Generic.List[string]
+        }
+        $entries[-1].Properties[$currProp].Add($propAndVal[1]) # add the value
+      })
+    }
+  })
+  $entries | ForEach-Object {
+    if ($_.Name -ne "Windows Boot Manager") {
+      Write-Host $_.Properties['identifier']
+    }
+    
+  }
+}
+
 function Set-InternalDrivePartitions{
   $internalDisk = Get-InternalDiskNumber
 
