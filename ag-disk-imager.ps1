@@ -382,14 +382,17 @@ assign letter=W
 "@
 
   New-Item -Name disklayout.txt -ItemType File -Force | OUT-NULL
+  $message = ""
 
   if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
     Add-Content -Path disklayout.txt $efiLayout
+    $message = "`n[ Writing efi disk layout... ]"
   } else {
+    $message = "`n[ Writing mbr/bios disk layout... ]"
     Add-Content -Path disklayout.txt $mbrLayout
   }
 
-  Write-Host "`n[ Writing disk layout... ]" -ForegroundColor Cyan
+  Write-Host $message -ForegroundColor Cyan
 
   $command = "diskpart /s disklayout.txt"
   Invoke-Expression $command
