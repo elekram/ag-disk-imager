@@ -12,7 +12,7 @@ complicated solutions that cost money or require lots of infrastructure. Simply 
 
 ## Usage
 
-Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate these folder and guide the user on its first run depending on how the manifest.json is configured. You just need to provide the Windows images.
+Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate these folder and guide the user on its first run depending on how the manifest.json is configured. You just need to provide the Windows images (and optional drivers/unattend files).
 
 ## Introduction
 
