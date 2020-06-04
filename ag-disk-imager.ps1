@@ -197,7 +197,7 @@ function New-ImageJob ($_args){
   if([bool]$isUnattendFile) {
     Set-UnattendFile($unattendFile)
   }
-
+  Clear-BootLoaderEntries
   Set-BootLoader
 }
 
@@ -321,7 +321,7 @@ function Get-InternalDiskNumber {
   return $InternalDiskNumbers[0]
 }
 
-function Clear-BootManagerEntries {
+function Clear-BootLoaderEntries {
   $bcdOutput = (bcdedit /v) -join "`n"
   $entries = New-Object System.Collections.Generic.List[pscustomobject]]
   ($bcdOutput -split '(?m)^(.+\n-)-+\n' -ne '').ForEach({
@@ -338,11 +338,14 @@ function Clear-BootManagerEntries {
       })
     }
   })
+
   $entries | ForEach-Object {
     if ($_.Name -ne "Windows Boot Manager") {
-      Write-Host $_.Properties['identifier']
+      $bootLoaderIdentifier = $_.Properties['identifier']
+      Write-Host "Removing: $bootLoaderIdentifier"
+      $command = "bcdedit /delete '$bootLoaderIdentifier'"
+      Invoke-Expression $command
     }
-    
   }
 }
 

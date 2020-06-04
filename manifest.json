@@ -3,12 +3,7 @@
     "Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
       "drivers": true,
-      "unattend": "cats.xml"
-    },
-    "Factory Image": {
-      "wim": "",
-      "drivers": false,
-      "unattend": ""
+      "unattend": "unattend.xml"
     }
   },
   "20DAS0L00": {
@@ -88,7 +83,7 @@
     "config": "replace",
     "tasks": {
       "Win10-Loan-Laptop": {
-        "wim": "l420_7856_4cm_loanlaptop.wim",
+        "wim": "l420_7856_4cm_loanlaptop_v2.wim",
         "drivers": false,
         "unattend": ""
       },

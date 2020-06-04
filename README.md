@@ -23,20 +23,21 @@ AG Uses a JSON file as its manifest where machine models are defined. WMIC is us
 * Clean and partition the disk for you on the fly (supports UEFI and BIOS)
   * Ensuring never to overwrite your external boot drive for machines which enumerate their disks in and odd order
 * If desired, inject drivers from a local repository on the USB drive after imaging
-* Also inject an unattend.xml file of your choice into the completed image if required.
+* Also inject an unattend.xml file of your choice into the completed image if required
+* Cleanup stale windows bootloader entries
 * Detect and write the correct bootloader (UEFI/BIOS)
 
 ## Docs
 
-ag-disk-imager.ps1 needs to be in a directory with a file named 'manifest.json' and two folders: a 'wim' folder, a 'drivers' folder and an 'unattend' folder. On the first run AG will check for, and if needed, create the folders required for you. A folder with the machine's model name (found in the firmware) will be created in the drivers folder. You will then be asked to place exported drivers into this folder.
+ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json** and three folders: a **wim** folder, a **drivers** folder and an **unattend** folder. On the first run AG will check for, and if needed, create the folders required for you. A folder with the machine's model name (found in the firmware) will be created in the drivers folder. You will then be asked to place exported drivers into this folder, though you can option not to inject drivers if you so choose.
   
-## manifest.json
+## manifest.json (see example below)
 
-AG needs the computer model(s) listed in a manifest.json as key values, this value will be matched to the machine's model number in its firmware (see JSON example below). It's from this information that AG will generate a menu for the user to select from when the script is first run.  
+AG needs the computers you want to image model(s) listed in a **manifest.json** as JSON keys, this key will be matched to the machine's model number in its firmware (see JSON example below). It's from this information that AG will generate a menu for the user to select from when the script is first run.  
 
-Each machine model listed will contain an object which must contain a key for the device's full name, named 'name', a key called 'config' which defines the tasks which get dynamically added to the program menu, and a 'tasks' key which lists the different imaging tasks and their options. The 'tasks' key then needs another nested object with 'wim', 'drivers' and 'unattend' keys. See example below for a clearer understanding.  
+Each machine model listed will contain an object which must contain a key for the device's full name, named **name**, a key called **config** which defines the tasks which get dynamically added to the program menu, and a **tasks** key which lists the different imaging tasks and their options. The **tasks** key then needs another nested object as its value with **wim**, **drivers** and **unattend** keys. See example below for a clearer understanding.  
 
-**Note:** the defaults key in the manifest does not need to be nested under 'tasks' as it doesn't require additional values.
+**Note:** the **defaults** key and its tasks in the manifest can be applied to all machine models and does not need to be nested under **tasks** as it doesn't require additional values like machine model keys.
 
 ```json
 {
@@ -70,13 +71,13 @@ Each machine model listed will contain an object which must contain a key for th
 }
 ```
 
-The 'config' attribute can be set to *defaults*, *append* or *replace*. If set to *append* AG will list the 'defaults' tasks and also machine specific tasks specified under the machine's model name, while *replace* will only list the machine specific tasks. If the config key is set to 'defaults' only the tasks from the defaults list will be shown. 
+The **config** attribute can be set to *defaults*, *append* or *replace*. If set to *append* AG will list the tasks under **defaults** in the manifest and also machine specific tasks specified under the machine's model name, while *replace* will only list the machine specific tasks. If the config key is set to *defaults* only the tasks from the defaults key in the manifest will be shown.  
 
 ## Drivers
 
 Place exported driver inf files into their respective model folder names in the 'drivers' folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM.  
   
-So for the 'Lenovo ThinkPad 11e Gen2' model listed in the aforementioned example manifest you would have a folder named '20DAS0L00' in the *drivers* folder with your exported drivers inside. If you don't wish to inject drivers simply set the 'driver' key to **false** in its task.
+So for the 'Lenovo ThinkPad 11e Gen2' model listed in the aforementioned example manifest you would have a folder named '20DAS0L00' in the *drivers* folder with your exported drivers inside. If you don't wish to inject drivers simply set the **driver** key to *false* in its task.
 
 ## Unattend
 
