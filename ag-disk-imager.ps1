@@ -197,7 +197,6 @@ function New-ImageJob ($_args){
   if([bool]$isUnattendFile) {
     Set-UnattendFile($unattendFile)
   }
-  Clear-BootLoaderEntries
   Set-BootLoader
 }
 
@@ -281,7 +280,12 @@ function Set-BootLoader{
     Invoke-Expression $efiCommand
     Invoke-Expression $efiCommand
   } else {
-    Clear-BootLoaderEntries
+    try {
+      Clear-BootLoaderEntries
+    } catch {
+      # do nothing 
+    }
+    
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
     Invoke-Expression $biosCommand
   }
