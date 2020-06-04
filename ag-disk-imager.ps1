@@ -281,9 +281,10 @@ function Set-BootLoader{
     Invoke-Expression $efiCommand
   } else {
     try {
+      Write-Host "[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
       Clear-BootLoaderEntries
     } catch {
-      # do nothing 
+      Write-Host "[ >> No entries found << ]" -ForegroundColor DarkYellow
     }
     
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
@@ -347,7 +348,7 @@ function Clear-BootLoaderEntries {
   $entries | ForEach-Object {
     if ($_.Name -ne "Windows Boot Manager") {
       $bootLoaderIdentifier = $_.Properties['identifier']
-      Write-Host "Removing: $bootLoaderIdentifier"
+      Write-Host "[ >> Removed entry: $bootLoaderIdentifier << ]" -ForegroundColor DarkYellow
       $command = "bcdedit /delete '$bootLoaderIdentifier'"
       Invoke-Expression $command
     }
