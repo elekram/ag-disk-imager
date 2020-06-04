@@ -281,6 +281,7 @@ function Set-BootLoader{
     Invoke-Expression $efiCommand
     Invoke-Expression $efiCommand
   } else {
+    Clear-BootLoaderEntries
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
     Invoke-Expression $biosCommand
   }
