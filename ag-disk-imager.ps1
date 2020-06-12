@@ -10,13 +10,20 @@ function main {
   Set-PowerSchemeToHigh
   Get-MachineModel
   Test-ManifestForModel
+  Test-ManifestForDefaults
   Test-ManifestForMachineRequiredProperties
   Test-ManifestForDuplicateNames
   Test-WimFolder
   Get-ImageMenuForDevice
-  Write-Host "[ >> All Good!! <<]" -ForegroundColor Green
+  Write-Host "[ >> All Good <<]" -ForegroundColor Green
 }
 
+function Test-ManifestForDefaults{
+  if(![bool]($manifest.PSobject.Properties.name -Match "defaults")){
+    Write-Host "[ Error: defaults key found not found in manifest. At least one default task required. Script will now exit. ]`n" -ForegroundColor DarkRed
+    exit
+  }
+}
 function Test-ManifestForModel{
   if(![bool]($manifest.PSobject.Properties.name -Match $script:machineModel)){
     Write-Host "[ Error: Machine model not found in manifest. Script will now exit. ]`n" -ForegroundColor DarkRed
