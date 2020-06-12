@@ -2,6 +2,7 @@
   "defaults": {
     "Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
+      "release": "1709",
       "drivers": true,
       "unattend": "unattend.xml"
     }
@@ -80,13 +81,8 @@
   },
   "78564CM": {
     "name": "Lenovo ThinkPad L420",
-    "config": "replace",
+    "config": "append",
     "tasks": {
-      "Win10-Loan-Laptop": {
-        "wim": "l420_7856_4cm_loanlaptop_v2.wim",
-        "drivers": false,
-        "unattend": ""
-      },
       "Win10-NAPLAN": {
         "wim": "l420_7856_4cm_naplan.wim",
         "drivers": false,
