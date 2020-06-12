@@ -7,7 +7,6 @@ $script:machineModel = ""
 
 function main {
   Show-ApplicationTitle
-  Set-PowerSchemeToHigh
   Get-MachineSerialNumber
   Get-MachineModel
   Test-ManifestForModel
@@ -194,7 +193,7 @@ function New-ImageJob ($_args){
   [bool]$isUnattendFile = Test-UnattendFile($unattendFile)
 
   Set-InternalDrivePartitions
-
+  Set-PowerSchemeToHigh
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$imageFile" -index 1 -ApplyPath "w:\"
   Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow
@@ -303,7 +302,7 @@ function Set-BootLoader{
 
 function Get-MachineSerialNumber{
   $serialNumber = get-ciminstance win32_bios | Select-Object -ExpandProperty serialnumber
-  Write-Host "[ Machine Serial Number: $serialNumber ]`n" -ForegroundColor Yellow
+  Write-Host "`n[ Machine Serial Number: $serialNumber ]`n" -ForegroundColor Yellow
 }
 
 function Get-MachineModel{
