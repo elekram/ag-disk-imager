@@ -8,6 +8,7 @@ $script:machineModel = ""
 function main {
   Show-ApplicationTitle
   Set-PowerSchemeToHigh
+  Get-MachineSerialNumber
   Get-MachineModel
   Test-ManifestForModel
   Test-ManifestForDefaults
@@ -15,6 +16,7 @@ function main {
   Test-ManifestForDuplicateNames
   Test-WimFolder
   Get-ImageMenuForDevice
+  Get-MachineSerialNumber
   Write-Host "[ >> All Good <<]" -ForegroundColor Green
 }
 
@@ -229,7 +231,7 @@ function Test-UnattendFile ($unattendFile){
 
 function Test-DriversForMachineModelExist($drivers){
   if([bool]$drivers -eq 1){
-    Write-Host "`n[ Warning: Inject drivers flag set to 'true' ]" -ForegroundColor Yellow
+    Write-Host "[ Warning: Inject drivers flag set to 'true' ]" -ForegroundColor Yellow
     Write-Host "`n[ Checking for drivers... ]" -ForegroundColor Cyan
 
     [bool] $isDriversFolder = Test-Path -Path "$script:driversPath"
@@ -288,7 +290,7 @@ function Set-BootLoader{
     Invoke-Expression $efiCommand
   } else {
     try {
-      Write-Host "[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
+      Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
       Clear-BootLoaderEntries
     } catch {
       Write-Host "[ >> No entries found << ]" -ForegroundColor DarkYellow
@@ -297,6 +299,11 @@ function Set-BootLoader{
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
     Invoke-Expression $biosCommand
   }
+}
+
+function Get-MachineSerialNumber{
+  $serialNumber = get-ciminstance win32_bios | Select-Object -ExpandProperty serialnumber
+  Write-Host "[ Machine Serial Number: $serialNumber ]`n" -ForegroundColor Yellow
 }
 
 function Get-MachineModel{
@@ -309,7 +316,7 @@ function Test-WimFolder {
   [bool] $isWimFolder = Test-Path -Path "$script:wimPath"
   if($isWimFolder -ne 1){
     New-Item -Path $script:wimPath -ItemType Directory | OUT-NULL
-    Write-Host "`n[ >> Created missing WIM folder << ]" -ForegroundColor DarkYellow
+    Write-Host "[ >> Created missing WIM folder << ]" -ForegroundColor DarkYellow
   }
 }
 
