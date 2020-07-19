@@ -144,6 +144,7 @@ function New-ImageJob ($_args){
   $imageFile = ""
   $unattendFile = ""
   [bool]$drivers = 0
+  $version = ""
 
   # check if selected option is a number character
   if($menuOption -match '\d' -ne 1) {
@@ -168,18 +169,22 @@ function New-ImageJob ($_args){
       $imageFile = $manifest.$script:machineModel.'tasks'.$imageName.'wim'
       $unattendFile = $manifest.$script:machineModel.'tasks'.$imageName.'unattend'
       $drivers = $manifest.$script:machineModel.'tasks'.$imageName.'drivers'
+      $version = $manifest.$script:machineModel.'tasks'.$imageName.'version'
     } else {
+
       Test-ManifestTaskProperties($manifest.'defaults'.$imageName)
 
       $imageFile = $manifest.'defaults'.$imageName.'wim'
       $unattendFile = $manifest.'defaults'.$imageName.'unattend'
       $drivers = $manifest.'defaults'.$imageName.'drivers'
+      $version = $manifest.'defaults'.$imageName.'version'
     }
 
   } else {
     $imageFile = $manifest.$script:machineModel.'tasks'.$imageName.'wim'
     $unattendFile = $manifest.$script:machineModel.'tasks'.$imageName.'unattend'
     $drivers = $manifest.$script:machineModel.'tasks'.$imageName.'drivers'
+    $version = $manifest.$script:machineModel.'tasks'.$imageName.'version'
   }
 
 
@@ -189,7 +194,7 @@ function New-ImageJob ($_args){
   }
 
   Test-WimFolderForImageFile($imageFile)
-  Test-DriversForMachineModelExist($drivers)
+  Test-DriversForMachineModelExist($drivers, $version)
   [bool]$isUnattendFile = Test-UnattendFile($unattendFile)
 
   Set-InternalDrivePartitions
@@ -197,9 +202,9 @@ function New-ImageJob ($_args){
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$imageFile" -index 1 -ApplyPath "w:\"
   Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow
-
+  return
   if([bool]$drivers -eq 1){
-    Set-DriversOnImagedPartition
+    Set-DriversOnImagedPartition($version)
   }
 
   if([bool]$isUnattendFile) {
@@ -228,24 +233,33 @@ function Test-UnattendFile ($unattendFile){
   }
 }
 
-function Test-DriversForMachineModelExist($drivers){
+function Test-DriversForMachineModelExist($_args){
+
+  $drivers = $_args[0]
+  $version = $_args[1]
+
   if([bool]$drivers -eq 1){
     Write-Host "[ Warning: Inject drivers flag set to 'true' ]" -ForegroundColor Yellow
     Write-Host "`n[ Checking for drivers... ]" -ForegroundColor Cyan
 
-    [bool] $isDriversFolder = Test-Path -Path "$script:driversPath"
+    if([string]::IsNullOrWhiteSpace($version)){
+      Write-Host "[ ERROR: Manifest missing 'version' key for task. Version required when driver inject driver set to true. Script will now exit ]" -ForegroundColor DarkRed
+      exit
+    }
+
+    [bool] $isDriversFolder = Test-Path -Path "$script:driversPath\$version"
     if($isDriversFolder -ne 1){
-      New-Item -Path $script:driversPath -ItemType Directory | OUT-NULL
+      New-Item -Path "$script:driversPath\$version" -ItemType Directory | OUT-NULL
       Write-Host "[ >> Created missing drivers root folder << ]" -ForegroundColor DarkYellow
     }
 
-    [bool] $isDriversForModel = Test-Path -Path "$script:driversPath\$script:machineModel"
+    [bool] $isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
     if($isDriversForModel -ne 1){
-      New-Item -Path "$script:driversPath\$script:machineModel" -ItemType Directory | OUT-NULL
+      New-Item -Path "$script:driversPath\$version\$script:machineModel" -ItemType Directory | OUT-NULL
       Write-Host "[ >> Created drivers folder for $script:machineModel << ]" -ForegroundColor DarkYellow
     }
 
-    $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$script:machineModel" | Measure-Object
+    $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$version\$script:machineModel" | Measure-Object
     if($driversDirectoryInfo.count -eq 0) {
       Write-Host "[ Error: Please add drivers for model: $script:machineModel. Script will now exit ]`n" -ForegroundColor DarkRed
       exit
@@ -263,8 +277,6 @@ function Test-UnattendFolder {
   }
 }
 
-
-
 function Test-WimFolderForImageFile($imageFile){
     Write-Host "[ Checking WIM exists... ]" -ForegroundColor Cyan
   if (Test-Path -Path "$script:wimPath\$imageFile" -PathType leaf) {
@@ -275,9 +287,9 @@ function Test-WimFolderForImageFile($imageFile){
   }
 }
 
-function Set-DriversOnImagedPartition {
+function Set-DriversOnImagedPartition($version) {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
-  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$script:machineModel" -Recurse -ForceUnsigned | Out-Null
+  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel" -Recurse -ForceUnsigned | Out-Null
   Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor DarkYellow
 }
 
