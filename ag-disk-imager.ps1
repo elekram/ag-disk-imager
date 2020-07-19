@@ -202,7 +202,7 @@ function New-ImageJob ($_args){
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$imageFile" -index 1 -ApplyPath "w:\"
   Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow
-  return
+  
   if([bool]$drivers -eq 1){
     Set-DriversOnImagedPartition($version)
   }
