@@ -2,7 +2,7 @@
   "defaults": {
     "Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
-      "release": "1709",
+      "version": "1709",
       "drivers": true,
       "unattend": "unattend.xml"
     }
@@ -85,6 +85,7 @@
     "tasks": {
       "Win10-NAPLAN": {
         "wim": "l420_7856_4cm_naplan.wim",
+        "version": "1709",
         "drivers": false,
         "unattend": ""
       }
@@ -96,11 +97,13 @@
     "tasks": {
       "Win10 ThinkCenter-M710": {
         "wim": "tc_m710s.wim",
+        "version": "1709",
         "drivers": false,
         "unattend": ""
       },
       "Win10 ThinkCenter-M710-NAPLAN": {
         "wim": "tc_m710s_naplan.wim",
+        "version": "1709",
         "drivers": false,
         "unattend": ""
       }
