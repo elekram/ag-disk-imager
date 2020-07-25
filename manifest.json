@@ -1,124 +1,94 @@
 {
-  "defaults": {
+	"tasks": {
     "Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
       "version": "1709",
       "drivers": true,
       "unattend": "unattend.xml"
-    }
-  },
-  "20DAS0L00": {
-    "name": "Lenovo ThinkPad 11e Gen2",
-    "config": "defaults"
-  },
-  "20G90003AU": {
-    "name": "Lenovo ThinkPad 11e Gen3",
-    "config":"defaults"
-  },
-  "20HTS00P00": {
-    "name": "Lenovo ThinkPad 11e Gen4",
-    "config":"defaults"
-  },
-  "20LRS04R00": {
-    "name": "Lenovo ThinkPad 11e Gen5 (soldered SSD)",
-    "config":"defaults"
-  },
-  "20M8000JAU": {
-    "name": "Lenovo ThinkPad L380",
-    "config": "defaults"
-  },
-  "20M8S0YA00": {
-    "name": "Lenovo ThinkPad L380",
-    "config": "defaults"
-  },
-  "20NTS00Q00": {
-    "name": "Lenovo ThinkPad L390",
-    "config": "defaults"
-  },
-  "20NUS0K100": {
-    "name": "Lenovo ThinkPad L390",
-    "config": "defaults"
-  },
-  "20G80001AU": {
-    "name": "Lenovo ThinkPad Yoga 11e Gen3",
-    "config": "defaults"
-  },
-  "20HSS01R00": {
-    "name": "Lenovo ThinkPad Yoga 11e Gen4",
-    "config": "defaults"
-  },
-  "20HSS03000": {
-    "name": "Lenovo ThinkPad Yoga 11e Gen4",
-    "config":"defaults"
-  },
-  "20LNS09W00": {
-    "name": "Lenovo ThinkPad Yoga 11e Gen5 (soldered ssd)",
-    "config":"defaults"
-  },
-  "20LNS0KV00": {
-    "name": "Lenovo ThinkPad Yoga 11e Gen5",
-    "config":"defaults"
-  },
-  "20FE002XAU": {
-    "name": "Lenovo ThinkPad Yoga 260",
-    "config":"defaults"
-  },
-  "20JJS1SF00": {
-    "name": "Lenovo ThinkPad Yoga 370",
-    "config":"defaults"
-  },
-  "20LJA016AU": {
-    "name": "Lenovo ThinkPad Yoga X380",
-    "config":"defaults"
-  },
-  "20NQS00V00": {
-    "name": "Lenovo ThinkPad Yoga X390",
-    "config":"defaults"
-  },
-  "51012ISK": {
-    "name": "Lenovo MIIX 510",
-    "config": "defaults"
-  },
-  "78564CM": {
-    "name": "Lenovo ThinkPad L420",
-    "config": "append",
-    "tasks": {
-      "Win10-NAPLAN": {
-        "wim": "l420_7856_4cm_naplan.wim",
-        "version": "1709",
-        "drivers": false,
-        "unattend": ""
-      }
-    }
-  },
-  "10M8S3CF00": {
-    "name": "Lenovo ThinkCentre m710s",
-    "config": "replace",
-    "tasks": {
-      "Win10 ThinkCenter-M710": {
-        "wim": "tc_m710s.wim",
-        "version": "1709",
-        "drivers": false,
-        "unattend": ""
-      },
-      "Win10 ThinkCenter-M710-NAPLAN": {
-        "wim": "tc_m710s_naplan.wim",
-        "version": "1709",
-        "drivers": false,
-        "unattend": ""
-      }
-    }
-  },
-  "TravelMate P446-M": {
-    "name": "TravelMate P446",
-    "config": "defaults"
-  },
-  "TravelMate P449-G3-M": {
-    "name": "TravelMate P449",
-    "config": "defaults"
-  },
-  "TravelMate P449-M": {
-    "name": "TravelMate P449",
-    "config": "defaults"
-  }
+    },
+		"Win10-NAPLAN": {
+			"wim": "l420_7856_4cm_naplan.wim"
+		},
+		"Win10 ThinkCenter-M710": {
+			"wim": "tc_m710s.wim"
+		},
+		"Win10 ThinkCenter-M710-NAPLAN": {
+			"wim": "tc_m710s_naplan.wim"
+		}
+	},
+	"deviceModels": {
+		"20DAS02L00": [
+			"Win10-1709-Enterprise"
+		],
+		"20G90003AU": [
+			"Win10-1709-Enterprise"
+		],
+		"20HTS00P00": [
+			"Win10-1709-Enterprise"
+		],
+		"20LRS04R00": [
+			"Win10-1709-Enterprise"
+		],
+		"20M8000JAU": [
+			"Win10-1709-Enterprise"
+		],
+		"20M8S0YA00": [
+			"Win10-1709-Enterprise"
+		],
+		"20NTS00Q00": [
+			"Win10-1709-Enterprise"
+		],
+		"20NUS0K100": [
+			"Win10-1709-Enterprise"
+		],
+		"20G80001AU": [
+			"Win10-1709-Enterprise"
+		],
+		"20HSS01R00": [
+			"Win10-1709-Enterprise"
+		],
+		"20HSS03000": [
+			"Win10-1709-Enterprise"
+		],
+		"20LNS09W00": [
+			"Win10-1709-Enterprise"
+		],
+		"20LNS0KV00": [
+			"Win10-1709-Enterprise"
+		],
+		"20FE002XAU": [
+			"Win10-1709-Enterprise"
+		],
+		"20JJS1SF00": [
+			"Win10-1709-Enterprise"
+		],
+		"20LJA016AU": [
+			"Win10-1709-Enterprise"
+		],
+		"20NQS00V00": [
+			"Win10-1709-Enterprise"
+		],
+		"20Q6S2PB00": [
+			"Win10-1709-Enterprise"
+		],
+		"51012ISK": [
+			"Win10-1709-Enterprise"
+		],
+		"78564CM": [
+			"Win10-1709-Enterprise"
+		],
+		"10M8S3CF00": [
+			"Win10 ThinkCenter-M710",
+			"Win10 ThinkCenter-M710-NAPLAN"
+		],
+		"TravelMate P446-M": [
+			"Win10-1709-Enterprise"
+		],
+		"TravelMate P449-G3-M": [
+			"Win10-1709-Enterprise"
+		],
+		"TravelMate P449-M": [
+			"Win10-1709-Enterprise"
+		]
+	}
 }
