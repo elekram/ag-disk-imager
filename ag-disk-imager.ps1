@@ -18,7 +18,7 @@ function Get-TasksMenuForDevice {
   $counter = 0
   [System.Collections.ArrayList]$taskCollection = @('0')
 
-  foreach ($item in $manifest.'deviceModels'.$script:machineModel) {
+  foreach ($item in $manifest.'models'.$script:machineModel) {
     $taskCollection.Add($item) | Out-Null
   }
 
@@ -126,7 +126,7 @@ function Get-MachineSerialNumber{
 	Write-Host "`n[ Machine Serial Number: $serialNumber ]`n" -ForegroundColor Yellow
 }
 function Test-ManifestForModel{
-  if(![bool]($script:manifest.'deviceModels'.PSobject.Properties.name -Match $script:machineModel)){
+  if(![bool]($script:manifest.'models'.PSobject.Properties.name -Match $script:machineModel)){
     Write-Host "[ Error: Machine model not found in manifest. Script will now exit. ]`n" -ForegroundColor DarkRed
     exit
   }

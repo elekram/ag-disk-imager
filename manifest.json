@@ -4,7 +4,7 @@
       "wim": "win10-ent-1709-soe.wim",
       "version": "1709",
       "drivers": true,
-      "unattend": "unattend.xml"
+			"unattend": "unattend.xml"
     },
 		"Win10-NAPLAN": {
 			"wim": "l420_7856_4cm_naplan.wim"
@@ -16,7 +16,7 @@
 			"wim": "tc_m710s_naplan.wim"
 		}
 	},
-	"deviceModels": {
+	"models": {
 		"20DAS02L00": [
 			"Win10-1709-Enterprise"
 		],
