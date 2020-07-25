@@ -25,9 +25,9 @@ function Get-TasksMenuForDevice {
   Write-Host "`nMenu" -ForegroundColor Magenta
   Write-Host "++++" -ForegroundColor Gray
 
-  Foreach ($img in $taskCollection) {
-    if ($img -ne 'config' -and $img -ne '0'){
-      Write-Host "[$counter] Task: $img" -ForegroundColor DarkYellow
+  Foreach ($task in $taskCollection) {
+    if ($task -ne '0'){
+      Write-Host "[$counter] Task: $task" -ForegroundColor DarkYellow
     }
     $counter++
   }
