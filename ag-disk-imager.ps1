@@ -161,13 +161,13 @@ function Test-TaskForDrivers($taskName){
       exit
     }
 
-    [bool] $isDriversFolder = Test-Path -Path "$script:driversPath\$version"
+    [bool]$isDriversFolder = Test-Path -Path "$script:driversPath\$version"
     if($isDriversFolder -ne 1){
       New-Item -Path "$script:driversPath\$version" -ItemType Directory | OUT-NULL
       Write-Host "[ >> Created missing root drivers folder '$script:driversPath\$version' << ]" -ForegroundColor DarkYellow
     }
 
-    [bool] $isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
+    [bool]$isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
     if($isDriversForModel -ne 1){
       New-Item -Path "$script:driversPath\$version\$script:machineModel" -ItemType Directory | OUT-NULL
       Write-Host "[ >> Created drivers folder for device model: '$script:machineModel' << ]" -ForegroundColor DarkYellow
