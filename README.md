@@ -29,56 +29,45 @@ AG Uses a JSON file as its manifest where machine models are defined. WMIC is us
 
 ## Docs
 
-ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json** and three folders: a **wim** folder, a **drivers** folder and an **unattend** folder. On the first run AG will check for, and if needed, create the folders required for you. A folder with the machine's model name (found in the firmware) will be created in the drivers folder. You will then be asked to place exported drivers into this folder, though you can option not to inject drivers if you so choose.
+ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json** and three folders: a **wim** folder, a **drivers** folder and an **unattend** folder. On the first run AG will check for, and if needed, create the folders required for you. If the task contains a 'drivers' key set with a boolean value set 'true' a folder with the machine's model name (found in the devices firmware) will be created in the drivers folder under the windows version you define using the 'version' key in the manifest (this allows driver sets for different vesions of Windows to be organised). You will then be asked to place exported drivers (or SCCM driver packs) into this folder, though you can option not to inject drivers if you so choose by settings the 'drivers' key to false or by simply not adding these keys to the task object in the manifest. At a minimum the 'wim' key is required for a task to run.
   
 ## manifest.json (see example below)
 
-AG needs the computers you want to image model(s) listed in a **manifest.json** as JSON keys, this key will be matched to the machine's model number in its firmware (see JSON example below). It's from this information that AG will generate a menu for the user to select from when the script is first run.  
-
-Each machine model listed will contain an object which must contain a key for the device's full name, named **name**, a key called **config** which defines the tasks which get dynamically added to the program menu, and a **tasks** key which lists the different imaging tasks and their options. The **tasks** key then needs another nested object as its value with **wim**, **drivers** and **unattend** keys. See example below for a clearer understanding.  
-
-**Note:** the **defaults** key and its tasks in the manifest can be applied to all machine models and does not need to be nested under **tasks** as it doesn't require additional values like machine model keys.
+AG needs the computers you want to image model(s) listed in a **manifest.json** as keys under the 'models' key, models key will be matched to the machine's model number found in its firmware. Each model needs an array with the task names defined matching the 'tasks' object in the **manifest.json** (see JSON example below)
 
 ```json
 {
-  "defaults": {
-    "Win10-1709-Enterprise": {
+  "tasks": {
+    "SOE-Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
+      "version": "1709",
       "drivers": true,
-      "unattend": "win10-unattend.xml"
+      "unattend": "unattend.xml"
     },
-    "Factory Image": {
-      "wim": "",
-      "drivers": false,
-      "unattend": ""
+    "Win10-1909": {
+      "wim": "l420_7856_4cm_naplan.wim",
+      "unattend": "cats.xml"
+    },
+    "Win10 ThinkCenter-M710 Image": {
+      "wim": "tc_m710s.wim"
     }
   },
-  "20DAS0L00": {
-    "name": "Lenovo ThinkPad 11e Gen2",
-    "config": "defaults"
-  },
-  "10M8S3CF00": {
-    "name": "Lenovo ThinkCentre m710s",
-    "config": "replace",
-    "tasks": {
-      "Win10-Desktop-SOE": {
-        "wim": "win10-ent-1909-soe.wim",
-        "drivers": false,
-        "unattend": ""
-      }
-    }
+  "models": {
+    "20DAS02L00": [
+      "SOE-Win10-1709-Enterprise"
+    ],
+    "20G90003AU": [
+      "SOE-Win10-1709-Enterprise",
+      "Win10 ThinkCenter-M710"
+    ]
   }
 }
 ```
 
-The **config** attribute can be set to *defaults*, *append* or *replace*. If set to *append* AG will list the tasks under **defaults** in the manifest and also machine specific tasks specified under the machine's model name, while *replace* will only list the machine specific tasks. If the config key is set to *defaults* only the tasks from the defaults key in the manifest will be shown.  
-
 ## Drivers
 
-Place exported driver inf files into their respective model folder names in the 'drivers' folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM.  
-  
-So for the 'Lenovo ThinkPad 11e Gen2' model listed in the aforementioned example manifest you would have a folder named '20DAS0L00' in the *drivers* folder with your exported drivers inside. If you don't wish to inject drivers simply set the **driver** key to *false* in its task.
+Place exported driver inf files into their respective model folder names in the drivers folder matching the version folder from the **manifest.json** folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM or download SCCM packages from your devices vendor. Note: a 'drivers' key and 'version' key are required in the manifest.json under the task in order to inject drivers.
 
 ## Unattend
 
-Place unattend.xml files into the unattend folder and then define them in your manifest.json for each task. You can name the files anything you like while in the unattend folder and AG will copy the defined file (in the manifest) to the windows/panther directory after imaging renaming it to unattend.xml. If you leave this value blank AG will not try to inject an unattend file.
+Place unattend.xml files into the unattend folder and then define them in your manifest.json for each task. You can name the files anything you like while in the unattend folder and AG will copy the defined file (in the manifest) to the windows/panther directory after imaging renaming it to unattend.xml. If you leave this value blank or don't define the key at all AG will skip this step all together.
