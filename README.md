@@ -12,11 +12,11 @@ complicated solutions that cost money or require lots of infrastructure. Simply 
 
 ## Usage
 
-Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate these folder and guide the user on its first run depending on how the manifest.json is configured. You just need to provide the Windows images (and optional drivers/unattend files).
+Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate required folders as required and guide the user on its first run depending on how the manifest.json is configured. At a minimum, you will need to provide a Windows image and reference it in the **manifest.json**. Drivers and unattend files are optional.
 
 ## Introduction
 
-AG Uses a JSON file as its manifest where machine models are defined. WMIC is used to detect the manufacturer model from the machine's firmware and then match it with the model defined in the manifest file. This is then used to generate a menu pointing to defined image tasks within the manifest for the user to select when imaging devices.
+AG Uses a JSON file as its manifest where tasks and machine models are defined. WMIC is used to detect the manufacturer model from the machine's firmware and then match it with the model defined in the manifest file. This is then used to generate a menu pointing to defined image tasks within the manifest for the user to select when imaging devices. If AG doesn't find a reference to the detected machine model under the 'models' key in the manifest it will generate a menu with all available tasks under the 'tasks' key in the manifest.
   
 **AG Imager will:**
 
@@ -33,20 +33,19 @@ ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json*
   
 ## manifest.json (see example below)
 
-AG needs the computers you want to image model(s) listed in a **manifest.json** as keys under the 'models' key, models key will be matched to the machine's model number found in its firmware. Each model needs an array with the task names defined matching the 'tasks' object in the **manifest.json** (see JSON example below)
+AG needs the computers you want to image model(s) listed in a **manifest.json** as keys under the 'models' key in order to generate a custom tasks menu for that device. The models key will be matched to the machine's model number found in its firmware. Each model needs an array with the task names defined matching the 'tasks' object in the **manifest.json** (see JSON example below). If AG can't match the detected machine model with an entry in the in the **manifest.json** under 'models' then it will generate you a menu with all tasks listed under the 'tasks' key from the **manifest.json**.
 
 ```json
 {
   "tasks": {
     "SOE-Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
-      "version": "1709",
-      "drivers": true,
+      "drivers": "1709",
       "unattend": "unattend.xml"
     },
     "Win10-1909": {
       "wim": "l420_7856_4cm_naplan.wim",
-      "unattend": "cats.xml"
+      "unattend": "unattend.xml"
     },
     "Win10 ThinkCenter-M710 Image": {
       "wim": "tc_m710s.wim"
@@ -66,7 +65,7 @@ AG needs the computers you want to image model(s) listed in a **manifest.json** 
 
 ## Drivers
 
-Place exported driver inf files into their respective model folder names in the drivers folder matching the version folder from the **manifest.json** folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM or download SCCM packages from your devices vendor. Note: a 'drivers' key and 'version' key are required in the manifest.json under the task in order to inject drivers.
+Place exported driver inf files into their respective model folder names in the drivers folder matching the version folder from the **manifest.json** folder. See Microsoft's [Export-WindowsDriver cmdlet](https://docs.microsoft.com/en-us/powershell/module/dism/export-windowsdriver?view=win10-ps) for more information. Alternatively you can just use DISM or download SCCM packages from your devices vendor. Note: a 'drivers' key is required in the manifest.json under the task in order to inject drivers.
 
 ## Unattend
 
