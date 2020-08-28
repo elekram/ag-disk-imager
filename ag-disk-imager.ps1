@@ -8,28 +8,40 @@ function main {
   Show-ApplicationTitle
   Get-MachineSerialNumber
   Get-MachineModel
-  Test-ManifestForModel
   Get-TasksMenuForDevice
   Get-MachineSerialNumber
   Write-Host "[ >> All Good <<]" -ForegroundColor Green
 }
 
 function Get-TasksMenuForDevice {
+  [bool]$isDeviceInManifest = Test-ManifestForModel
+ 
   $counter = 0
-  [System.Collections.ArrayList]$taskCollection = @('0')
+  [System.Collections.ArrayList]$taskCollection = @()
 
-  foreach ($item in $manifest.'models'.$script:machineModel) {
-    $taskCollection.Add($item) | Out-Null
-  }
+  Write-Host "`nTasks Menu" -ForegroundColor Magenta
+  Write-Host "++++++++++" -ForegroundColor Gray
 
-  Write-Host "`nMenu" -ForegroundColor Magenta
-  Write-Host "++++" -ForegroundColor Gray
+  if ($isDeviceInManifest) {
+    foreach ($item in $manifest.'models'.$script:machineModel) {
+      $taskCollection.Add($item) | Out-Null
 
-  Foreach ($task in $taskCollection) {
-    if ($task -ne '0'){
-      Write-Host "[$counter] Task: $task" -ForegroundColor DarkYellow
+      $taskName = $item
+      Write-Host "[$counter] $taskName" -ForegroundColor DarkYellow
+  
+      $counter++
+
     }
-    $counter++
+  } else {
+    foreach ($property in $manifest.'tasks'.PSObject.Properties) { 
+    
+      $taskCollection.Add($property.Name) | Out-Null
+  
+      $taskName = $property.Name
+      Write-Host "[$counter] $taskName" -ForegroundColor DarkYellow
+  
+      $counter++
+    }
   }
 
   $selectedOption = Read-Host "`nSelect image option and hit enter or punch CTRL-C to exit`n"
@@ -56,7 +68,6 @@ function New-ImageTask($selectedOption) {
   $wimFile = Test-TaskForWimFile($taskName)
 
   [bool]$isDrivers = Test-TaskForDrivers($taskName) 
-
   [bool]$isUnattendFile = Test-UnattendFile($taskName)
 
   Set-InternalDrivePartitions
@@ -64,10 +75,10 @@ function New-ImageTask($selectedOption) {
 
   Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$wimFile" -index 1 -ApplyPath "w:\"
-  Write-Host "[ >> Completed image task << ]" -ForegroundColor DarkYellow
+  Write-Host "[ >> Completed image task << ]" -ForegroundColor Yellow
 
   if([bool]$isDrivers -eq 1){
-    $version = $script:manifest.'tasks'.$taskName.'wim'
+    $version = $script:manifest.'tasks'.$taskName.'drivers'
     Set-DriversOnImagedPartition($version)
   }
 
@@ -80,23 +91,25 @@ function New-ImageTask($selectedOption) {
 
 function Test-TaskName($taskName){
   if(![bool]($script:manifest.'tasks'.PSobject.Properties.name -Match $taskName)){
-    Write-Host "[ Error: Selected taskname: '$taskName' not found in manifest 'tasks' object. Script will now exit. ]`n" -ForegroundColor DarkRed
+    Write-Host "[ Error: Selected taskname: '$taskName' not found in manifest 'tasks' object. Check manifest tasks under '$script:machineModel'. Script will now exit. ]`n" -ForegroundColor DarkRed
     exit
   }
 }
 
 function Set-UnattendFile ($unattendFile){
   Copy-Item "$script:unattendPath\$unattendFile" -Destination "w:\windows\panther\unattend.xml"
-  Write-Host "[ >> Copied $unattendFile to windows\panther... << ]" -ForegroundColor DarkYellow
+  Write-Host "[ >> Copied $unattendFile to windows\panther... << ]" -ForegroundColor Yellow
 }
 
 function Set-DriversOnImagedPartition($version) {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
-  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel" -Recurse -ForceUnsigned | Out-Null
-  Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor DarkYellow
+  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel\" -Recurse -ForceUnsigned | Out-Null
+  Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor Yellow
 }
 
 function Set-BootLoader{
+  Write-Host "`n[ Setting Bootloader... ]" -ForegroundColor Cyan
+
   if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
     $efiCommand = "bcdboot w:\windows"
     Invoke-Expression $efiCommand
@@ -107,7 +120,7 @@ function Set-BootLoader{
       Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
       Clear-BootLoaderEntries
     } catch {
-      Write-Host "[ >> No entries found << ]" -ForegroundColor DarkYellow
+      Write-Host "[ >> No entries found << ]" -ForegroundColor Yellow
     }
     
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
@@ -116,21 +129,25 @@ function Set-BootLoader{
 }
 
 function Get-MachineModel{
-	Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
+	Write-Host "[ Retrieving computer model... ]`n" -ForegroundColor Cyan
 	$script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty "Model"
-	Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor DarkYellow
+	Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor Yellow
 }
 
 function Get-MachineSerialNumber{
 	$serialNumber = get-ciminstance win32_bios | Select-Object -ExpandProperty serialnumber
-	Write-Host "`n[ Machine Serial Number: $serialNumber ]`n" -ForegroundColor Yellow
+	Write-Host "`n[ >> Machine Serial Number: $serialNumber << ]`n" -ForegroundColor Yellow
 }
 function Test-ManifestForModel{
   if(![bool]($script:manifest.'models'.PSobject.Properties.name -Match $script:machineModel)){
-    Write-Host "[ Error: Machine model not found in manifest. Script will now exit. ]`n" -ForegroundColor DarkRed
-    exit
+    Write-Host "`n[ Warning: Machine model not found in manifest. Generating menu for all tasks. ]" -ForegroundColor DarkYellow
+    0
+  } else {
+    Write-Host "`n[ Found Machine model in manifest. Generating device specific tasks. ]`n" -ForegroundColor DarkYellow
+    1
   }
 }
+
 
 function Test-TaskForWimFile($taskName){
   if(![bool]($script:manifest.'tasks'.$taskName.PSobject.Properties.name -Match "wim")){
@@ -148,40 +165,53 @@ function Test-TaskForWimFile($taskName){
   $wimFile
 }
 
+function Test-TaskForWindowsVersionKey($taskName){
+  if(![bool]($script:manifest.'tasks'.$taskName.PSobject.Properties.name -Match "drivers")){
+    Write-Host "[ Error: Manifest task named '$taskName' missing key named 'drivers' type[string]. Example 1709, 1803, 1909 etc. Script will now exit ]" -ForegroundColor DarkRed
+    exit
+  }
+}
+
+
 function Test-TaskForDrivers($taskName){
-  $version = $script:manifest.'tasks'.$taskName.'version'
-  $drivers = $script:manifest.'tasks'.$taskName.'drivers'
+  $version = $script:manifest.'tasks'.$taskName.'drivers'
 
-  if([bool]$drivers -eq 1){
-    Write-Host "[ Warning: Inject drivers flag set to 'true' ]" -ForegroundColor Yellow
-    Write-Host "`n[ Checking for drivers... ]" -ForegroundColor Cyan
+  if([string]::IsNullOrWhiteSpace($version)){
+    0
+    return
+  }
 
-    if([string]::IsNullOrWhiteSpace($version)){
-      Write-Host "[ ERROR: Manifest missing 'version' key for selected task. Version key required when 'driver' key set to true. Script will now exit ]" -ForegroundColor DarkRed
+  Write-Host "`n[ Checking for drivers in .\drivers\$version folder... ]`n" -ForegroundColor Cyan
+
+  [bool]$isDriversFolder = Test-Path -Path "$script:driversPath\$version"
+  if($isDriversFolder -ne 1){
+    New-Item -Path "$script:driversPath\$version" -ItemType Directory | OUT-NULL
+    Write-Host "[ >> Created missing root drivers folder '$script:driversPath\$version' << ]" -ForegroundColor Yellow
+  }
+
+  [bool]$isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
+  if($isDriversForModel -ne 1){
+    New-Item -Path "$script:driversPath\$version\$script:machineModel" -ItemType Directory | OUT-NULL
+    Write-Host "[ >> Created drivers folder for device model: '$script:machineModel' << ]" -ForegroundColor Yellow
+  }
+
+  $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$version\$script:machineModel" | Measure-Object
+  if($driversDirectoryInfo.count -eq 0) {
+    Write-Host "[ WARNING: There were no drivers detected for this device ]" -ForegroundColor DarkYellow
+
+    $selectedOption = Read-Host "`nWould you like to continue anyway? (y/n)`n"
+    if ($selectedOption.ToLower() -eq 'y'){
+      Write-Host "`n[ >> Continuing without drivers << ]`n" -ForegroundColor Yellow
+      0
+    } else {
+      Write-Host "`n[ Script Exiting... ]`n" -ForegroundColor Cyan
       exit
     }
-
-    [bool]$isDriversFolder = Test-Path -Path "$script:driversPath\$version"
-    if($isDriversFolder -ne 1){
-      New-Item -Path "$script:driversPath\$version" -ItemType Directory | OUT-NULL
-      Write-Host "[ >> Created missing root drivers folder '$script:driversPath\$version' << ]" -ForegroundColor DarkYellow
-    }
-
-    [bool]$isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
-    if($isDriversForModel -ne 1){
-      New-Item -Path "$script:driversPath\$version\$script:machineModel" -ItemType Directory | OUT-NULL
-      Write-Host "[ >> Created drivers folder for device model: '$script:machineModel' << ]" -ForegroundColor DarkYellow
-    }
-
-    $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$version\$script:machineModel" | Measure-Object
-    if($driversDirectoryInfo.count -eq 0) {
-      Write-Host "[ Error: Please add drivers for model: $script:machineModel. Script will now exit ]`n" -ForegroundColor DarkRed
-      exit
-    }
-
-    Write-Host "[ >> Found drivers folder for $script:machineModel << ]" -ForegroundColor DarkYellow
+  } else {
+    Write-Host "[ >> Found drivers folder for $script:machineModel << ]" -ForegroundColor Yellow 
     1
   }
+
 }
 
 function Test-UnattendFile ($taskName){
@@ -190,14 +220,20 @@ function Test-UnattendFile ($taskName){
   if(![string]::IsNullOrWhiteSpace($unattendFile)){
     Test-UnattendFolder
 
-    Write-Host "[ Checking for specified unattend file: '$unattendFile'...]" -ForegroundColor Cyan
+    Write-Host "[ Checking for specified unattend file: '$unattendFile'... ]" -ForegroundColor Cyan
 
     if(Test-Path -Path "$script:unattendPath\$unattendFile" -PathType leaf){
-      Write-Host "[ >> Found $unattendFile << ]" -ForegroundColor DarkYellow
+      Write-Host "[ >> Found $unattendFile << ]" -ForegroundColor Yellow
       1
     } else {
-      Write-Host "[ Error: Could not locate $unattendFile in unattend folder. Compare manifest and unattend folder. Script will now exit ]`n" -ForegroundColor DarkRed
-      exit
+      Write-Host "`n[ Warning: Could not locate unattend file: $unattendFile ]`n" -ForegroundColor DarkYellow
+      $selectedOption = Read-Host "Would you like to continue anyway? (y/n)"
+      if($selectedOption.ToLower() -eq 'y') {
+        0
+      } else {
+        Write-Host "`n[ Script Exiting... ]`n" -ForegroundColor Cyan
+        exit
+      }
     }
   }
 }
@@ -206,7 +242,7 @@ function Test-UnattendFolder {
   [bool] $isUnattendFolder = Test-Path -Path "$script:unattendPath"
   if($isUnattendFolder -ne 1){
     New-Item -Path $script:unattendPath -ItemType Directory | OUT-NULL
-    Write-Host "`n[ >> Created missing unattend folder << ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ >> Created missing unattend folder << ]" -ForegroundColor Yellow
   }
 }
 
@@ -261,7 +297,7 @@ assign letter=W
   $command = "diskpart /s disklayout.txt"
   Invoke-Expression $command
 
-  Write-Host "[ >> Disk layout complete << ]" -ForegroundColor DarkYellow
+  Write-Host "[ >> Disk layout complete << ]" -ForegroundColor Yellow
 }
 
 function Get-InternalDiskNumber {
@@ -306,7 +342,7 @@ function Clear-BootLoaderEntries {
   $entries | ForEach-Object {
     if ($_.Name -ne "Windows Boot Manager") {
       $bootLoaderIdentifier = $_.Properties['identifier']
-      Write-Host "[ >> Removed entry: $bootLoaderIdentifier << ]" -ForegroundColor DarkYellow
+      Write-Host "[ >> Removed entry: $bootLoaderIdentifier << ]" -ForegroundColor Yellow
       $command = "bcdedit /delete '$bootLoaderIdentifier'"
       Invoke-Expression $command
     }

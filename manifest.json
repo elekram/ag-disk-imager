@@ -2,8 +2,7 @@
 	"tasks": {
     "Win10-1709-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
-      "version": "1709",
-      "drivers": true,
+      "drivers": "1709",
 			"unattend": "unattend.xml"
     },
 		"Win10-NAPLAN": {
@@ -14,6 +13,16 @@
 		},
 		"Win10 ThinkCenter-M710-NAPLAN": {
 			"wim": "tc_m710s_naplan.wim"
+		},
+		"Win10-1909-Pro-Vanilla": {
+			"wim": "1909_Pro_Vanilla.wim",
+			"drivers": "1909",
+			"unattend": "unattend.xml"
+		},
+		"Win10-1909-Studnet-BYOD": {
+			"wim": "SOE-1909.1-StudentBYOD.wim",
+			"drivers": "1909",
+			"unattend": "unattend.xml"
 		}
 	},
 	"models": {
@@ -51,7 +60,8 @@
 			"Win10-1709-Enterprise"
 		],
 		"20LNS09W00": [
-			"Win10-1709-Enterprise"
+			"Win10-1709-Enterprise",
+			"Win10-1909-Pro-Vanilla"
 		],
 		"20LNS0KV00": [
 			"Win10-1709-Enterprise"
@@ -70,6 +80,9 @@
 		],
 		"20Q6S2PB00": [
 			"Win10-1709-Enterprise"
+		],
+		"20JHCTO1WW": [
+			"Win10-1909-Pro-Vanilla"
 		],
 		"51012ISK": [
 			"Win10-1709-Enterprise"
