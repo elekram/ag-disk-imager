@@ -21,7 +21,7 @@ AG Uses a JSON file as its manifest where tasks and machine models are defined. 
 **AG Imager will:**
 
 * Clean and partition the disk for you on the fly (supports UEFI and BIOS)
-  * Ensuring never to overwrite your external boot drive for machines which enumerate their disks in and odd order
+  * Ensuring never to overwrite your external boot drive for machines which enumerate their disks in an odd order
 * If desired, inject drivers from a local repository on the USB drive after imaging
 * Also inject an unattend.xml file of your choice into the completed image if required
 * Cleanup stale windows bootloader entries
