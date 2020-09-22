@@ -9,8 +9,7 @@ function main {
   Get-MachineSerialNumber
   Get-MachineModel
   Get-TasksMenuForDevice
-  Get-MachineSerialNumber
-  Write-Host "[ >> All Good <<]" -ForegroundColor Green
+  Get-FinishOptions
 }
 
 function Get-TasksMenuForDevice {
@@ -19,18 +18,24 @@ function Get-TasksMenuForDevice {
   $counter = 0
   [System.Collections.ArrayList]$taskCollection = @()
 
-  Write-Host "`nTasks Menu" -ForegroundColor Magenta
-  Write-Host "++++++++++" -ForegroundColor Gray
-
-  if ($isDeviceInManifest) {
-    foreach ($item in $manifest.'models'.$script:machineModel) {
-      $taskCollection.Add($item) | Out-Null
-
-      $taskName = $item
-      Write-Host "[$counter] $taskName" -ForegroundColor DarkYellow
+  Write-Host "`nTask Menu" -ForegroundColor Magenta
+  Write-Host "---------" -ForegroundColor Gray
   
-      $counter++
+  if ($isDeviceInManifest) {
+    
+    foreach ($property in $manifest.'tasks'.PSObject.Properties) { 
+    
+      $taskCollection.Add($property.Name) | Out-Null
+  
+      $taskName = $property.Name
 
+      if ($manifest.'models'.$script:machineModel -contains $taskName) {
+        Write-Host "[" -ForegroundColor DarkGray -NoNewline; Write-Host "$counter" -ForegroundColor Yellow -NoNewline; Write-Host "] " -ForegroundColor DarkGray -NoNewline; Write-Host $taskName -ForegroundColor Yellow
+      } else {
+        Write-Host "[$counter] $taskName" -ForegroundColor DarkGray
+      }
+      
+      $counter++
     }
   } else {
     foreach ($property in $manifest.'tasks'.PSObject.Properties) { 
@@ -38,17 +43,21 @@ function Get-TasksMenuForDevice {
       $taskCollection.Add($property.Name) | Out-Null
   
       $taskName = $property.Name
-      Write-Host "[$counter] $taskName" -ForegroundColor DarkYellow
+      Write-Host "[$counter] $taskName" -ForegroundColor DarkGray
   
       $counter++
     }
   }
+  Write-Host ""
+  $taskCollection.Add("Shutdown Windows PE Gracefully") | Out-Null
+  Write-Host "[$counter] Shutdown Windows PE Gracefully" -ForegroundColor DarkGreen
 
-  $selectedOption = Read-Host "`nSelect image option and hit enter or punch CTRL-C to exit`n"
+  $selectedOption = Read-Host "`nSelect an option and hit enter or hit CTRL-C to exit`n"
   New-ImageTask($selectedOption)
 }
 
 function New-ImageTask($selectedOption) {
+
   if($selectedOption -match '\d' -ne 1) {
     Write-Host "Invalid option. Invalid option. Choose a number from the menu." -ForegroundColor DarkRed
     Get-TasksMenuForDevice
@@ -63,19 +72,23 @@ function New-ImageTask($selectedOption) {
     return
   }
 
+  if ($taskName -eq "Shutdown Windows PE Gracefully") {
+    wpeutil shutdown
+  }
+
   Test-TaskName($taskName)
 
   $wimFile = Test-TaskForWimFile($taskName)
 
   [bool]$isDrivers = Test-TaskForDrivers($taskName) 
   [bool]$isUnattendFile = Test-UnattendFile($taskName)
-
+  
   Set-InternalDrivePartitions
   Set-PowerSchemeToHigh
 
-  Write-Host "[ Beginning image task... ]" -ForegroundColor Cyan
+  Write-Host "`n[ Beginning image task... ]" -ForegroundColor Cyan
   Expand-WindowsImage -ImagePath "$script:wimPath\$wimFile" -index 1 -ApplyPath "w:\"
-  Write-Host "[ >> Completed image task << ]" -ForegroundColor Yellow
+  Write-Host "`n[ >> Image task complete << ]" -ForegroundColor Yellow
 
   if([bool]$isDrivers -eq 1){
     $version = $script:manifest.'tasks'.$taskName.'drivers'
@@ -87,6 +100,19 @@ function New-ImageTask($selectedOption) {
     Set-UnattendFile($unattendFile)
   }
   Set-BootLoader
+  Get-MachineSerialNumber
+  Write-Host "`n[ >> All Good <<]" -ForegroundColor Magenta
+}
+
+function Get-FinishOptions {
+  Write-Host "`nPress any key to shutdown gracefully or ESC key to exit" -ForegroundColor Green
+  
+  $key = [console]::ReadKey()
+  if ($key.Key -ne '27') {
+    wpeutil Shutdown
+  } else {
+    exit
+  }
 }
 
 function Test-TaskName($taskName){
@@ -108,7 +134,7 @@ function Set-DriversOnImagedPartition($version) {
 }
 
 function Set-BootLoader{
-  Write-Host "`n[ Setting Bootloader... ]" -ForegroundColor Cyan
+  Write-Host "`n[ Setting Bootloader... ]`n" -ForegroundColor Cyan
 
   if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
     $efiCommand = "bcdboot w:\windows"
@@ -131,7 +157,7 @@ function Set-BootLoader{
 function Get-MachineModel{
 	Write-Host "[ Retrieving computer model... ]`n" -ForegroundColor Cyan
 	$script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty "Model"
-	Write-Host "[ >> Found machine model $script:machineModel << ]" -ForegroundColor Yellow
+	Write-Host "[ >> Found machine model: $script:machineModel << ]" -ForegroundColor Yellow
 }
 
 function Get-MachineSerialNumber{
@@ -140,10 +166,10 @@ function Get-MachineSerialNumber{
 }
 function Test-ManifestForModel{
   if(![bool]($script:manifest.'models'.PSobject.Properties.name -Match $script:machineModel)){
-    Write-Host "`n[ Warning: Machine model not found in manifest. Generating menu for all tasks. ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ Warning: Machine model not found in manifest. ]" -ForegroundColor DarkYellow
     0
   } else {
-    Write-Host "`n[ Found Machine model in manifest. Generating device specific tasks. ]`n" -ForegroundColor DarkYellow
+    Write-Host "`n[ Found Machine model in manifest. Tasks in " -ForegroundColor DarkYellow -NoNewline; Write-Host "yellow" -ForegroundColor Yellow -NoNewline; Write-Host " are recommended for this device. ]`n" -ForegroundColor DarkYellow
     1
   }
 }
@@ -197,7 +223,7 @@ function Test-TaskForDrivers($taskName){
 
   $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$version\$script:machineModel" | Measure-Object
   if($driversDirectoryInfo.count -eq 0) {
-    Write-Host "[ WARNING: There were no drivers detected for this device ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ WARNING: There were no drivers detected for this device ]" -ForegroundColor DarkYellow
 
     $selectedOption = Read-Host "`nWould you like to continue anyway? (y/n)`n"
     if ($selectedOption.ToLower() -eq 'y'){
@@ -297,7 +323,7 @@ assign letter=W
   $command = "diskpart /s disklayout.txt"
   Invoke-Expression $command
 
-  Write-Host "[ >> Disk layout complete << ]" -ForegroundColor Yellow
+  Write-Host "`n[ >> Disk layout complete << ]" -ForegroundColor Yellow
 }
 
 function Get-InternalDiskNumber {
