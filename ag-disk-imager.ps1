@@ -19,7 +19,7 @@ function Get-TasksMenuForDevice {
   [System.Collections.ArrayList]$taskCollection = @()
 
   Write-Host "`nTask Menu" -ForegroundColor Magenta
-  Write-Host "---------" -ForegroundColor Gray
+  Write-Host "+++++++++" -ForegroundColor Gray
   
   if ($isDeviceInManifest) {
     
@@ -49,14 +49,24 @@ function Get-TasksMenuForDevice {
     }
   }
   Write-Host ""
+
+  $taskCollection.Add("Capture Image") | Out-Null
+  Write-Host "[$counter] Capture Image" -ForegroundColor Cyan
+
+  $counter++
   $taskCollection.Add("Shutdown Windows PE Gracefully") | Out-Null
-  Write-Host "[$counter] Shutdown Windows PE Gracefully" -ForegroundColor DarkGreen
+  Write-Host "[$counter] Shutdown Windows PE Gracefully" -ForegroundColor Green
 
   $selectedOption = Read-Host "`nSelect an option and hit enter or hit CTRL-C to exit`n"
   New-ImageTask($selectedOption)
 }
 
 function New-ImageTask($selectedOption) {
+
+  if($taskCollection[[int]$selectedOption] -eq "Capture Image") {
+    New-CaptureImageTask
+    exit
+  }
 
   if($selectedOption -match '\d' -ne 1) {
     Write-Host "Invalid option. Invalid option. Choose a number from the menu." -ForegroundColor DarkRed
@@ -102,6 +112,59 @@ function New-ImageTask($selectedOption) {
   Set-BootLoader
   Get-MachineSerialNumber
   Write-Host "`n[ >> All Good <<]" -ForegroundColor Magenta
+}
+
+function New-CaptureImageTask {
+  $counter = 0
+  [System.Collections.ArrayList]$taskCollection = @()
+  [System.Collections.ArrayList]$selectableOptions = @()
+  
+  Write-Host "`n[ Capture Image Selected... ]`n" -ForegroundColor Cyan
+  Write-Host "Volumes" -ForegroundColor Magenta
+  Write-Host "-------"
+
+  Get-Volume | ForEach-Object {
+    if($_.DriveLetter.length -gt 0) {
+
+      $taskCollection.Add($_.DriveLetter) | Out-Null
+      $selectableOptions.Add($counter) | Out-Null
+
+      $size = [math]::Round($_.Size/1GB)
+      $readableSize = "$size GB" 
+      Write-Host "[$counter] " $_.DriveLetter $_.FileSystem $readableSize $_.HealthStatus $_.FileSystemLabel -ForegroundColor DarkGray
+      $counter++  
+    }
+    
+  }
+
+  do {
+    $driveOption = Read-Host "`nVolume to capture`n"
+  } while ($selectableOptions -notcontains $driveOption)
+  
+  do {
+    Write-Host "Enter a file name for the image. Allowed characeters [a-z,0-9,-]`n" -ForegroundColor DarkYellow
+    $fileName = Read-Host "Filename for image"
+  } while ($fileName -notmatch '^[a-z0-9.-]{1,200}$')
+
+  
+  
+  $vol = $taskCollection[[int]$driveOption]
+  $z = ":\"
+  $capturePath = ($vol)+($z)
+
+  $imgPath = "$script:wimPath\$fileName"
+
+  if(Test-Path $imgPath -PathType Leaf) {
+    Write-Host "`n[ Error: File with name '$imgPath' already exists. Try again. ]" -ForegroundColor Red
+    New-CaptureImageTask
+    return
+  }
+
+  Write-Host "[ Beginning Capture Task... ]" -ForegroundColor Cyan 
+  New-WindowsImage -ImagePath $imgPath -CapturePath $capturePath -Name "Windows"
+  Write-Host "`n[ >> Capture task completed << ]" -ForegroundColor Yellow
+  
+  Get-FinishOptions
 }
 
 function Get-FinishOptions {
@@ -234,7 +297,7 @@ function Test-TaskForDrivers($taskName){
       exit
     }
   } else {
-    Write-Host "[ >> Found drivers folder for $script:machineModel << ]" -ForegroundColor Yellow 
+    Write-Host "`n[ >> Found drivers folder for $script:machineModel << ]" -ForegroundColor Yellow 
     1
   }
 
@@ -246,10 +309,10 @@ function Test-UnattendFile ($taskName){
   if(![string]::IsNullOrWhiteSpace($unattendFile)){
     Test-UnattendFolder
 
-    Write-Host "[ Checking for specified unattend file: '$unattendFile'... ]" -ForegroundColor Cyan
+    Write-Host "`n[ Checking for specified unattend file: '$unattendFile'... ]" -ForegroundColor Cyan
 
     if(Test-Path -Path "$script:unattendPath\$unattendFile" -PathType leaf){
-      Write-Host "[ >> Found $unattendFile << ]" -ForegroundColor Yellow
+      Write-Host "`n[ >> Found $unattendFile << ]" -ForegroundColor Yellow
       1
     } else {
       Write-Host "`n[ Warning: Could not locate unattend file: $unattendFile ]`n" -ForegroundColor DarkYellow
