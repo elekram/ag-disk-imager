@@ -160,7 +160,7 @@ function New-CaptureImageTask {
     return
   }
 
-  Write-Host "[ Beginning Capture Task... ]" -ForegroundColor Cyan 
+  Write-Host "`n[ Beginning Capture Task... ]" -ForegroundColor Cyan 
   New-WindowsImage -ImagePath $imgPath -CapturePath $capturePath -Name "Windows"
   Write-Host "`n[ >> Capture task completed << ]" -ForegroundColor Yellow
   
@@ -180,20 +180,20 @@ function Get-FinishOptions {
 
 function Test-TaskName($taskName){
   if(![bool]($script:manifest.'tasks'.PSobject.Properties.name -Match $taskName)){
-    Write-Host "[ Error: Selected taskname: '$taskName' not found in manifest 'tasks' object. Check manifest tasks under '$script:machineModel'. Script will now exit. ]`n" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: Selected taskname: '$taskName' not found in manifest 'tasks' object. Check manifest tasks under '$script:machineModel'. Script will now exit. ]" -ForegroundColor DarkRed
     exit
   }
 }
 
 function Set-UnattendFile ($unattendFile){
   Copy-Item "$script:unattendPath\$unattendFile" -Destination "w:\windows\panther\unattend.xml"
-  Write-Host "[ >> Copied $unattendFile to windows\panther... << ]" -ForegroundColor Yellow
+  Write-Host "`n[ >> Copied $unattendFile to windows\panther... << ]" -ForegroundColor Yellow
 }
 
 function Set-DriversOnImagedPartition($version) {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
   Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel\" -Recurse -ForceUnsigned | Out-Null
-  Write-Host "[ >> Finished injecting drivers << ]" -ForegroundColor Yellow
+  Write-Host "`n[ >> Finished injecting drivers << ]" -ForegroundColor Yellow
 }
 
 function Set-BootLoader{
@@ -209,7 +209,7 @@ function Set-BootLoader{
       Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
       Clear-BootLoaderEntries
     } catch {
-      Write-Host "[ >> No entries found << ]" -ForegroundColor Yellow
+      Write-Host "`n[ >> No entries found << ]" -ForegroundColor Yellow
     }
     
     $biosCommand = "bcdboot w:\windows /s w: /f BIOS"
@@ -218,9 +218,9 @@ function Set-BootLoader{
 }
 
 function Get-MachineModel{
-	Write-Host "[ Retrieving computer model... ]`n" -ForegroundColor Cyan
+	Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
 	$script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty "Model"
-	Write-Host "[ >> Found machine model: $script:machineModel << ]" -ForegroundColor Yellow
+	Write-Host "`n[ >> Found machine model: $script:machineModel << ]" -ForegroundColor Yellow
 }
 
 function Get-MachineSerialNumber{
@@ -240,23 +240,25 @@ function Test-ManifestForModel{
 
 function Test-TaskForWimFile($taskName){
   if(![bool]($script:manifest.'tasks'.$taskName.PSobject.Properties.name -Match "wim")){
-    Write-Host "[ Error: Manifest task named '$taskName' missing key named 'wim' type[string]. Script will now exit ]" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: Manifest task named '$taskName' missing key named 'wim' type[string]. Script will now exit ]" -ForegroundColor DarkRed
     exit
   }
 
   $wimFile = $script:manifest.'tasks'.$taskName.'wim'
 
   if ([string]::IsNullOrWhiteSpace($wimFile)){
-    Write-Host  "[ Error: No WIM file defined for '$imageName' in manifest. Script will now exit. ]`n"  -ForegroundColor DarkRed
+    Write-Host  "`n[ Error: No WIM file defined for '$imageName' in manifest. Script will now exit. ]"  -ForegroundColor DarkRed
     exit
   }
+
+  Test-WimFolderForImageFile($wimFile)
 
   $wimFile
 }
 
 function Test-TaskForWindowsVersionKey($taskName){
   if(![bool]($script:manifest.'tasks'.$taskName.PSobject.Properties.name -Match "drivers")){
-    Write-Host "[ Error: Manifest task named '$taskName' missing key named 'drivers' type[string]. Example 1709, 1803, 1909 etc. Script will now exit ]" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: Manifest task named '$taskName' missing key named 'drivers' type[string]. Example 1709, 1803, 1909 etc. Script will now exit ]" -ForegroundColor DarkRed
     exit
   }
 }
@@ -270,18 +272,18 @@ function Test-TaskForDrivers($taskName){
     return
   }
 
-  Write-Host "`n[ Checking for drivers in .\drivers\$version folder... ]`n" -ForegroundColor Cyan
+  Write-Host "`n[ Checking for drivers in .\drivers\$version folder... ]" -ForegroundColor Cyan
 
   [bool]$isDriversFolder = Test-Path -Path "$script:driversPath\$version"
   if($isDriversFolder -ne 1){
     New-Item -Path "$script:driversPath\$version" -ItemType Directory | OUT-NULL
-    Write-Host "[ >> Created missing root drivers folder '$script:driversPath\$version' << ]" -ForegroundColor Yellow
+    Write-Host "`n[ >> Created missing root drivers folder '$script:driversPath\$version' << ]" -ForegroundColor Yellow
   }
 
   [bool]$isDriversForModel = Test-Path -Path "$script:driversPath\$version\$script:machineModel"
   if($isDriversForModel -ne 1){
     New-Item -Path "$script:driversPath\$version\$script:machineModel" -ItemType Directory | OUT-NULL
-    Write-Host "[ >> Created drivers folder for device model: '$script:machineModel' << ]" -ForegroundColor Yellow
+    Write-Host "`n[ >> Created drivers folder for device model: '$script:machineModel' << ]" -ForegroundColor Yellow
   }
 
   $driversDirectoryInfo = Get-ChildItem -Path "$script:driversPath\$version\$script:machineModel" | Measure-Object
@@ -336,11 +338,11 @@ function Test-UnattendFolder {
 }
 
 function Test-WimFolderForImageFile($wimFile){
-  Write-Host "[ Checking WIM exists... ]" -ForegroundColor Cyan
+  Write-Host "`n[ Checking WIM exists... ]" -ForegroundColor Cyan
   if (Test-Path -Path "$script:wimPath\$wimFile" -PathType leaf) {
-    Write-Host "[ >> Found $wimFile << ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ >> Found $wimFile << ]" -ForegroundColor DarkYellow
   } else {
-    Write-Host "[ Error: Could not locate '$wimFile' in wim folder. Compare manifest and wim folder. Script will now exit ]`n" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: Could not locate '$wimFile' in wim folder. Compare manifest and wim folder. Script will now exit ]" -ForegroundColor DarkRed
     exit
   }
 }
@@ -399,12 +401,12 @@ function Get-InternalDiskNumber {
     $InternalDiskNumbers += $_.DeviceID.Substring($_.DeviceID.Length -1)
   }
   if ($InternalDiskNumbers.Count -gt 1){
-    Write-Host "[ Error: Found more than one internal disk. Script must exit ]`n" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: Found more than one internal disk. Script must exit ]" -ForegroundColor DarkRed
     exit
   }
 
   if ($InternalDiskNumbers.Count -eq 0) {
-    Write-Host "[ Error: No internal disk found for imaging. Script must exit ]`n" -ForegroundColor DarkRed
+    Write-Host "`n[ Error: No internal disk found for imaging. Script must exit ]" -ForegroundColor DarkRed
     exit
   }
   return $InternalDiskNumbers[0]
@@ -431,7 +433,7 @@ function Clear-BootLoaderEntries {
   $entries | ForEach-Object {
     if ($_.Name -ne "Windows Boot Manager") {
       $bootLoaderIdentifier = $_.Properties['identifier']
-      Write-Host "[ >> Removed entry: $bootLoaderIdentifier << ]" -ForegroundColor Yellow
+      Write-Host "`n[ >> Removed entry: $bootLoaderIdentifier << ]" -ForegroundColor Yellow
       $command = "bcdedit /delete '$bootLoaderIdentifier'"
       Invoke-Expression $command
     }
