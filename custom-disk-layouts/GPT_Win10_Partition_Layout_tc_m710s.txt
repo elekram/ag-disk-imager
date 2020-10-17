@@ -1,0 +1,13 @@
+select disk 0
+clean
+convert gpt
+create partition efi size=260
+format fs=fat32 quick
+assign letter=s
+create partition msr size=128
+create partition primary size=131072
+format fs=ntfs quick label=WINDOWS
+assign letter=w
+create partition primary
+format fs=ntfs quick label=WORK
+assign letter=z

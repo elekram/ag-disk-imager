@@ -1,10 +1,5 @@
 {
 	"tasks": {
-    "Win10-1709-Enterprise": {
-      "wim": "win10-ent-1709-soe.wim",
-      "drivers": "1709",
-			"unattend": "unattend.xml"
-    },
 		"Win10-NAPLAN": {
 			"wim": "l420_7856_4cm_naplan.wim"
 		},
@@ -14,94 +9,122 @@
 		"Win10 ThinkCenter-M710-NAPLAN": {
 			"wim": "tc_m710s_naplan.wim"
 		},
-		"Win10-1909-Pro-Vanilla": {
-			"wim": "1909_Pro_Vanilla.wim",
+		"Win10-1909-ProEducation-Vanilla": {
+			"wim": "1909_ProEducation_Vanilla.wim",
 			"drivers": "1909",
 			"unattend": "unattend.xml"
 		},
-		"Win10-1909-Studnet-BYOD": {
-			"wim": "SOE-1909.1-StudentBYOD.wim",
+		"Win10-1909-ProEducation-BYOD": {
+			"wim": "1909_ProEducation_BYOD.wim",
 			"drivers": "1909",
 			"unattend": "unattend.xml"
+		},
+		"Win10-1909-Home-Vanilla": {
+			"wim": "1909_Home_Vanilla.wim",
+			"drivers": "1909",
+			"unattend": "unattend.xml"
+		},
+		"Win10-1909-Home-BYOD": {
+			"wim": "1909_Home_BYOD.wim",
+			"drivers": "1909",
+			"unattend": "unattend.xml"
+		},
+		"Win10-1909-Enterprise-Staff": {
+			"wim": "1909_Enterprise_Staff.wim",
+			"drivers": "1909"
+		},
+		"Win10-1909-Enterprise-LabPCs": {
+			"wim": "1909_Enterprise_LabPCs.wim",
+			"drivers": "1909",
+			"disklayout": "GPT_Win10_Partition_Layout_tc_m710s.txt"
+		},
+		"Win10-1909-L420-Student-Loan-Laptop": {
+			"wim": "1909-Enterprise-L420-StudentLoan.wim",
+			"driver": "1909"
 		}
 	},
 	"models": {
 		"20DAS02L00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
+		],
+		"20FE000YAU": [
+			"Win10-1909-Home-BYOD"
 		],
 		"20G90003AU": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20HTS00P00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20LRS04R00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20M8000JAU": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20M8S0YA00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20NTS00Q00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20NUS0K100": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20G80001AU": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20HSS01R00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20HSS03000": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20LNS09W00": [
-			"Win10-1709-Enterprise",
-			"Win10-1909-Pro-Vanilla"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20LNS0KV00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-ProEducation-BYOD"
 		],
 		"20FE002XAU": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20JJS1SF00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20LJA016AU": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20NQS00V00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"20Q6S2PB00": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Enterprise-Staff"
 		],
 		"20JHCTO1WW": [
-			"Win10-1909-Pro-Vanilla"
+			"Win10-1909-Home-BYOD"
 		],
 		"51012ISK": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Home-BYOD"
 		],
 		"78564CM": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-L420-Student-Loan-Laptop"
 		],
 		"10M8S3CF00": [
 			"Win10 ThinkCenter-M710",
 			"Win10 ThinkCenter-M710-NAPLAN"
 		],
 		"TravelMate P446-M": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Enterprise-Staff"
 		],
 		"TravelMate P449-G3-M": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Enterprise-Staff"
 		],
 		"TravelMate P449-M": [
-			"Win10-1709-Enterprise"
+			"Win10-1909-Enterprise-Staff"
+		],
+		"HP EliteDesk 705 G2 SFF": [
+			"Win10-1909-Enterprise-Staff"
 		]
 	}
 }

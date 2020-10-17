@@ -2,6 +2,7 @@ $script:manifest = Get-Content -Raw -Path .\manifest.json | ConvertFrom-Json
 $script:driversPath = ".\drivers"
 $script:wimPath = ".\wim"
 $script:unattendPath = ".\unattend"
+$script:diskLayoutPath = ".\custom-disk-layouts"
 $script:machineModel = ""
 
 function main {
@@ -93,7 +94,7 @@ function New-ImageTask($selectedOption) {
   [bool]$isDrivers = Test-TaskForDrivers($taskName) 
   [bool]$isUnattendFile = Test-UnattendFile($taskName)
   
-  Set-InternalDrivePartitions
+  Set-InternalDrivePartitions($taskName)
   Set-PowerSchemeToHigh
 
   Write-Host "`n[ Beginning image task... ]" -ForegroundColor Cyan
@@ -346,8 +347,10 @@ function Test-WimFolderForImageFile($wimFile){
     exit
   }
 }
-function Set-InternalDrivePartitions{
+function Set-InternalDrivePartitions($taskName){
   $internalDisk = Get-InternalDiskNumber
+
+  $customDiskLayout = $script:manifest.'tasks'.$taskName.'disklayout'
 
   $efiLayout = @"
 select disk $internalDisk
@@ -374,6 +377,7 @@ assign letter=W
 
   New-Item -Name disklayout.txt -ItemType File -Force | OUT-NULL
   $message = ""
+  $command = ""
 
   if($(Get-ComputerInfo).BiosFirmwareType -eq "Uefi"){
     Add-Content -Path disklayout.txt $efiLayout
@@ -383,12 +387,55 @@ assign letter=W
     Add-Content -Path disklayout.txt $mbrLayout
   }
 
-  Write-Host $message -ForegroundColor Cyan
+  ## This block is for custom disk layouts if specified for the task in the manifest
+  if (![string]::IsNullOrWhiteSpace($customDiskLayout)){
 
-  $command = "diskpart /s disklayout.txt"
+    Write-Host "`n[ >> Found custom disk layout reference '$customDiskLayout' << ]" -ForegroundColor Yellow
+
+    Write-Host "`n[ Checking '$customDiskLayout' file exists... ]" -ForegroundColor Cyan
+    if (Test-Path -Path "$script:diskLayoutPath\$customDiskLayout" -PathType leaf) {
+
+      Write-Host "`n[ >> Found $customDiskLayout << ]" -ForegroundColor DarkYellow
+
+      Test-LayoutFileForExceptedDiskNumber($customDiskLayout)
+
+      $command = "diskpart /s $script:diskLayoutPath\$customDiskLayout"
+
+      $message = "`n[ Writing custom disk layout: $customDiskLayout ... ]"
+
+    } else {
+      Write-Host "`n[ Error: Could not locate '$customDiskLayout' in 'custom-disk-layouts' folder. Compare manifest and 'custom-disk-layouts' folder. Script will now exit ]" -ForegroundColor DarkRed
+      exit
+    }
+  } else {
+    $command = "diskpart /s disklayout.txt"
+  }
+
+  Write-Host $message -ForegroundColor Cyan
   Invoke-Expression $command
 
   Write-Host "`n[ >> Disk layout complete << ]" -ForegroundColor Yellow
+}
+
+function Test-LayoutFileForExceptedDiskNumber($customDiskLayout) {
+
+  foreach($line in Get-Content "$script:diskLayoutPath\$customDiskLayout") {
+    if($line -match 'select' -and $line -match 'disk'){
+      $lineElement = $line.split(' ')
+    }
+  }
+
+  foreach($e in $lineElement) {
+    if ($e.ToLower() -ne 'select' -and $e.ToLower() -ne 'disk') {
+      $diskNumber = [int]$e
+    }
+  }
+
+  $internalDisk = Get-InternalDiskNumber
+  if ($diskNumber -ne $internalDisk) {
+    Write-Host "`n[ Error: Custom layout file: '$customDiskLayout' is attempting to write to a excepted disk. Script will now exit ]" -ForegroundColor Red
+    exit
+  }
 }
 
 function Get-InternalDiskNumber {
