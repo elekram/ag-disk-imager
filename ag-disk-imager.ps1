@@ -6,6 +6,8 @@ $script:diskLayoutPath = ".\custom-disk-layouts"
 $script:machineModel = ""
 
 function main {
+  Test-LayoutFileForExceptedDiskNumber("GPT_Win10_Partition_Layout_tc_m710s.txt")
+  exit
   Show-ApplicationTitle
   Get-MachineSerialNumber
   Get-MachineModel
@@ -426,7 +428,7 @@ function Test-LayoutFileForExceptedDiskNumber($customDiskLayout) {
   }
 
   foreach($e in $lineElement) {
-    if ($e.ToLower() -ne 'select' -and $e.ToLower() -ne 'disk') {
+    if ($e -match "^\d+$") {
       $diskNumber = [int]$e
     }
   }
