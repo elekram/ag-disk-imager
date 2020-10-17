@@ -343,7 +343,7 @@ function Test-UnattendFolder {
 function Test-WimFolderForImageFile($wimFile){
   Write-Host "`n[ Checking WIM exists... ]" -ForegroundColor Cyan
   if (Test-Path -Path "$script:wimPath\$wimFile" -PathType leaf) {
-    Write-Host "`n[ >> Found $wimFile << ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ >> Found $wimFile << ]" -ForegroundColor Yellow
   } else {
     Write-Host "`n[ Error: Could not locate '$wimFile' in wim folder. Compare manifest and wim folder. Script will now exit ]" -ForegroundColor DarkRed
     exit
@@ -397,7 +397,7 @@ assign letter=W
     Write-Host "`n[ Checking '$customDiskLayout' file exists... ]" -ForegroundColor Cyan
     if (Test-Path -Path "$script:diskLayoutPath\$customDiskLayout" -PathType leaf) {
 
-      Write-Host "`n[ >> Found $customDiskLayout << ]" -ForegroundColor DarkYellow
+      Write-Host "`n[ >> Found $customDiskLayout << ]" -ForegroundColor Yellow
 
       Test-LayoutFileForExceptedDiskNumber($customDiskLayout)
 
@@ -420,21 +420,21 @@ assign letter=W
 }
 
 function Test-LayoutFileForExceptedDiskNumber($customDiskLayout) {
-
+  # ensures that the diskpart text file doesn't try to wipe the external usb drive
   foreach($line in Get-Content "$script:diskLayoutPath\$customDiskLayout") {
     if($line -match 'select' -and $line -match 'disk'){
-      $lineElement = $line.split(' ')
+      $lineElements = $line.split(' ')
     }
   }
 
-  foreach($e in $lineElement) {
+  foreach($e in $lineElements) {
     if ($e -match "^\d+$") {
-      $diskNumber = [int]$e
+      $targetDiskNumber = [int]$e
     }
   }
 
   $internalDisk = Get-InternalDiskNumber
-  if ($diskNumber -ne $internalDisk) {
+  if ($targetDiskNumber -ne $internalDisk) {
     Write-Host "`n[ Error: Custom layout file: '$customDiskLayout' is attempting to write to a excepted disk. Script will now exit ]" -ForegroundColor Red
     exit
   }

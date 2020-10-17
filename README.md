@@ -12,7 +12,9 @@ complicated solutions that cost money or require lots of infrastructure. Simply 
 
 ## Usage
 
-Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate required folders as required and guide the user on its first run depending on how the manifest.json is configured. At a minimum, you will need to provide a Windows image and reference it in the **manifest.json**. Drivers and unattend files are optional.
+Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate required folders as required and guide the user on its first run depending on how the manifest.json is configured. At a minimum, you will need to provide a Windows image and reference it in the **manifest.json**. Drivers and unattend files are optional. 
+
+You can also specify a custom diskpart script file (diskpart /s [filename]) using the optional **disklayout** key for a task in the **manifest.json**. Script files need to be placed in a folder called 'custom-disk-layouts'. AG will check the folder for the specified file and if found apply the custom disk/partition layout.
 
 ## Introduction
 
@@ -48,7 +50,8 @@ AG needs the computers you want to image model(s) listed in a **manifest.json** 
       "unattend": "unattend.xml"
     },
     "Win10 ThinkCenter-M710 Image": {
-      "wim": "tc_m710s.wim"
+      "wim": "tc_m710s.wim",
+      "disklayout": "Custom-Diskpart-Script.txt"
     }
   },
   "models": {
@@ -70,3 +73,7 @@ Place exported driver inf files into their respective model folder names in the 
 ## Unattend
 
 Place unattend.xml files into the unattend folder and then define them in your manifest.json for each task. You can name the files anything you like while in the unattend folder and AG will copy the defined file (in the manifest) to the windows/panther directory after imaging renaming it to unattend.xml. If you leave this value blank or don't define the key at all AG will skip this step all together.
+
+## Custom Disk Layouts (diskpart)
+
+Place diskpart script files (diskpart /s [filename]) into the 'custom-disk-layouts' folder and specify them using the **disklayout** key in the **manifest.json** see manfiest.json example above. If the specified sciprt is found AG will override the default disk/partition layout with the one found in the script.
