@@ -98,7 +98,14 @@ function New-ImageTask($selectedOption) {
   Set-PowerSchemeToHigh
 
   Write-Host "`n[ Beginning image task... ]" -ForegroundColor Cyan
-  Expand-WindowsImage -ImagePath "$script:wimPath\$wimFile" -index 1 -ApplyPath "w:\"
+  try {
+    Expand-WindowsImage -ImagePath "$script:wimPath\$wimFile" -index 1 -ApplyPath "w:\"
+  } catch {
+    Write-Host "`n[ Error: something went wrong when trying to write file: $wimFile. See log.txt for details. Script will now exit ]" -ForegroundColor DarkRed
+    New-LogEntry($_)
+    exit
+  }
+  
   Write-Host "`n[ >> Image task complete << ]" -ForegroundColor Yellow
 
   if([bool]$isDrivers -eq 1){
@@ -112,7 +119,7 @@ function New-ImageTask($selectedOption) {
   }
   Set-BootLoader
   Get-MachineSerialNumber
-  Write-Host "`n[ >> All Good <<]" -ForegroundColor Magenta
+  Write-Host "`n[ >> $taskName completed <<]" -ForegroundColor Magenta
 }
 
 function New-CaptureImageTask {
@@ -193,7 +200,14 @@ function Set-UnattendFile ($unattendFile){
 
 function Set-DriversOnImagedPartition($version) {
   Write-Host "`n[ Injecting drivers... ]" -ForegroundColor Cyan
-  Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel\" -Recurse -ForceUnsigned | Out-Null
+  
+  try {
+    Add-WindowsDriver -Path "w:\" -Driver "$script:driversPath\$version\$script:machineModel\" -Recurse -ForceUnsigned | Out-Null
+  } catch {
+    Write-Host "`n[ Error: Something went wrong when attempting to inject drivers. See log.txt. Script will now exit ]" -ForegroundColor DarkRed
+    New-LogEntry($_)
+  }
+
   Write-Host "`n[ >> Finished injecting drivers << ]" -ForegroundColor Yellow
 }
 
@@ -485,6 +499,22 @@ function Clear-BootLoaderEntries {
       Invoke-Expression $command
     }
   }
+}
+
+function New-LogEntry($entry) {
+  $currentDateAndTime = Get-Date
+  $divider = "------------"
+
+  if (!(Test-Path .\log.txt -PathType Leaf)) {
+    New-Item -Name .\log.txt -ItemType File -Force | OUT-NULL
+    $logTitle = "AG ERROR LOG"
+    Add-Content -Path .\log.txt -Value $logTitle
+    Add-Content -Path .\log.txt -Value $divider
+  }
+
+  Add-Content -Path .\log.txt -Value "Logged: $currentDateAndTime"
+  Add-Content -Path .\log.txt -Value $entry
+  Add-Content -Path .\log.txt -Value $divider
 }
 
 function Set-PowerSchemeToHigh {
