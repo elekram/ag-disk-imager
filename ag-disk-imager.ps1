@@ -79,7 +79,7 @@ function Get-TasksMenuForDevice {
     
     $useDefaultTask = Read-Host "Would you like to use the default task? (y/n) or hit CTRL-C to exit"
 
-    if ($useDefaultTask.ToLower() -eq 'y') {
+    if ($useDefaultTask.ToLower() -eq 'y' -or $useDefaultTask -eq [string]::empty) {
       New-ImageTask($defaultTaskOption)
       return
     } else {
