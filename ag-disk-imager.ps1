@@ -339,7 +339,7 @@ function Test-TaskForDrivers($taskName){
     Write-Host "`n[ WARNING: There were no drivers detected for this device ]" -ForegroundColor DarkYellow
 
     $selectedOption = Read-Host "`nWould you like to continue anyway? (y/n)`n"
-    if ($selectedOption.ToLower() -eq 'y'){
+    if ($selectedOption.ToLower() -eq 'y' -or $selectedOption -eq [string]::empty){
       Write-Host "`n[ >> Continuing without drivers << ]`n" -ForegroundColor Yellow
       0
     } else {
@@ -367,7 +367,7 @@ function Test-UnattendFile ($taskName){
     } else {
       Write-Host "`n[ Warning: Could not locate unattend file: $unattendFile ]`n" -ForegroundColor DarkYellow
       $selectedOption = Read-Host "Would you like to continue anyway? (y/n)"
-      if($selectedOption.ToLower() -eq 'y') {
+      if($selectedOption.ToLower() -eq 'y' -or $selectedOption -eq [string]::empty) {
         0
       } else {
         Write-Host "`n[ Script Exiting... ]`n" -ForegroundColor Cyan
