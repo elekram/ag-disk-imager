@@ -271,7 +271,7 @@ function Get-MachineModel{
 
 function Get-MachineSerialNumber{
 	$serialNumber = get-ciminstance win32_bios | Select-Object -ExpandProperty serialnumber
-	Write-Host "`n[ >> Machine Serial Number: $serialNumber << ]`n" -ForegroundColor Yellow
+	Write-Host "`n[ >> Machine Serial Number: $serialNumber << ]" -ForegroundColor Yellow
 }
 function Test-ManifestForModel{
   if(![bool]($script:manifest.'models'.PSobject.Properties.name -Match $script:machineModel)){
