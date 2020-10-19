@@ -12,13 +12,11 @@ complicated solutions that cost money or require lots of infrastructure. Simply 
 
 ## Usage
 
-Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim**, **drivers** and **unattend** folders then simply run the script. AG will generate required folders as required and guide the user on its first run depending on how the manifest.json is configured. At a minimum, you will need to provide a Windows image and reference it in the **manifest.json**. Drivers and unattend files are optional. 
-
-You can also specify a custom diskpart script file (diskpart /s [filename]) using the optional **disklayout** key for a task in the **manifest.json**. Script files need to be placed in a folder called 'custom-disk-layouts'. AG will check the folder for the specified file and if found apply the custom disk/partition layout.
+Drop ag-disk-imager.ps1 into a folder with with a **manifest.json** (see below for details), **wim** and optional **drivers**, **unattend** and **custom-disk-layout** folders then simply run the script. AG will generate required folders as required and guide the user on its first run depending on how the manifest is .json is configured. At a minimum, you will need to provide a Windows image and reference it in the **manifest.json**. Drivers, unattend, and custom diskpart script files are optional.
 
 ## Introduction
 
-AG Uses a JSON file as its manifest where tasks and machine models are defined. WMIC is used to detect the manufacturer model from the machine's firmware and then match it with the model defined in the manifest file. This is then used to generate a menu pointing to defined image tasks within the manifest for the user to select when imaging devices. If AG doesn't find a reference to the detected machine model under the 'models' key in the manifest it will generate a menu with all available tasks under the 'tasks' key in the manifest.
+AG Uses a JSON file as its manifest where tasks and machine models are defined. WMIC is used to detect the manufacturer model from the machine's firmware and then match it with the model defined in the manifest file. A menu of all defined tasks will be generated  the 'tasks' key in the manifest.json. You can then define default tasks for specific machine models under the 'models' key in the manifest.json. Tasks in the menu will be highlighted for convenience.
   
 **AG Imager will:**
 
@@ -31,16 +29,16 @@ AG Uses a JSON file as its manifest where tasks and machine models are defined. 
 
 ## Docs
 
-ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json** and three folders: a **wim** folder, a **drivers** folder and an **unattend** folder. On the first run AG will check for, and if needed, create the folders required for you. If the task contains a 'drivers' key set with a boolean value set 'true' a folder with the machine's model name (found in the devices firmware) will be created in the drivers folder under the windows version you define using the 'version' key in the manifest (this allows driver sets for different vesions of Windows to be organised). You will then be asked to place exported drivers (or SCCM driver packs) into this folder, though you can option not to inject drivers if you so choose by settings the 'drivers' key to false or by simply not adding these keys to the task object in the manifest. At a minimum the 'wim' key is required for a task to run.
+ag-disk-imager.ps1 needs to be in a directory with a file named **manifest.json** and three folders: a **wim** folder, a **drivers** folder and an **unattend** folder. On the first run AG will check for, and if needed, create the folders required for you. If the task contains a 'drivers' key set with a boolean value set 'true' a folder with the machine's model name (found in the devices firmware) will be created in the drivers folder under the windows version you define using the 'version' key in the manifest (this allows driver sets for different vesions of Windows to be organised). You will then be asked to place exported drivers (or SCCM driver packs) into this folder, though you can option not to inject drivers if you so choose by not setting a 'drivers' key in the task object of the manifest. At a minimum the 'wim' key is required for a task to run.
   
 ## manifest.json (see example below)
 
-AG needs the computers you want to image model(s) listed in a **manifest.json** as keys under the 'models' key in order to generate a custom tasks menu for that device. The models key will be matched to the machine's model number found in its firmware. Each model needs an array with the task names defined matching the 'tasks' object in the **manifest.json** (see JSON example below). If AG can't match the detected machine model with an entry in the in the **manifest.json** under 'models' then it will generate you a menu with all tasks listed under the 'tasks' key from the **manifest.json**.
+For convenience AG will attempt to generate a custom menu highlighting recommended tasks for a specific machine model. It does this by comparing the detected machine model (from the devices firmware) against model names listed under the 'models' key in the **manifest.json**. Each model name is a key that expects an array. The array should be populated with task names from the 'tasks' key in the **manifest.json**. The first task name in the array will be the default task. All tasks in the array will be highlighted in the AG task menu when the script first runs, making it easy for the user to identify tasks for that device.
 
 ```json
 {
   "tasks": {
-    "SOE-Win10-1709-Enterprise": {
+    "SOE-Win10-1909-Enterprise": {
       "wim": "win10-ent-1709-soe.wim",
       "drivers": "1709",
       "unattend": "unattend.xml"
@@ -59,7 +57,7 @@ AG needs the computers you want to image model(s) listed in a **manifest.json** 
       "SOE-Win10-1709-Enterprise"
     ],
     "20G90003AU": [
-      "SOE-Win10-1709-Enterprise",
+      "SOE-Win10-1909-Enterprise",
       "Win10 ThinkCenter-M710"
     ]
   }

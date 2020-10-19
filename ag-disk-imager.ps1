@@ -23,7 +23,9 @@ function Get-TasksMenuForDevice {
   Write-Host "+++++++++" -ForegroundColor Gray
   
   if ($isDeviceInManifest) {
-    
+    $defaultTask = ""
+    $defaultTaskOption = ""
+
     foreach ($property in $manifest.'tasks'.PSObject.Properties) { 
     
       $taskCollection.Add($property.Name) | Out-Null
@@ -31,7 +33,16 @@ function Get-TasksMenuForDevice {
       $taskName = $property.Name
 
       if ($manifest.'models'.$script:machineModel -contains $taskName) {
-        Write-Host "[" -ForegroundColor DarkGray -NoNewline; Write-Host "$counter" -ForegroundColor Yellow -NoNewline; Write-Host "] " -ForegroundColor DarkGray -NoNewline; Write-Host $taskName -ForegroundColor Yellow
+        Write-Host "[" -ForegroundColor DarkGray -NoNewline; 
+        Write-Host "$counter" -ForegroundColor Yellow -NoNewline; 
+        Write-Host "] " -ForegroundColor DarkGray -NoNewline; 
+        Write-Host $taskName -ForegroundColor Yellow
+      
+        if([string]::IsNullOrWhiteSpace($defaultTask)) {
+          $defaultTaskOption = $counter
+          $defaultTask = $taskName
+        }
+      
       } else {
         Write-Host "[$counter] $taskName" -ForegroundColor DarkGray
       }
@@ -58,27 +69,47 @@ function Get-TasksMenuForDevice {
   $taskCollection.Add("Shutdown Windows PE Gracefully") | Out-Null
   Write-Host "[$counter] Shutdown Windows PE Gracefully" -ForegroundColor Green
 
-  $selectedOption = Read-Host "`nSelect an option and hit enter or hit CTRL-C to exit`n"
+  if(![string]::IsNullOrWhiteSpace($defaultTask)) {
+    
+    Write-Host "`n`nDefault task " -ForegroundColor DarkYellow -NoNewline; 
+    Write-Host $defaultTask -ForegroundColor Blue -NoNewline; 
+    Write-Host " found for machine model " -ForegroundColor DarkYellow -NoNewline; 
+    Write-Host $script:machineModel -ForegroundColor Blue -NoNewline; 
+    Write-Host "" -ForegroundColor DarkYellow
+    
+    $useDefaultTask = Read-Host "Would you like to use the default task? (y/n) or hit CTRL-C to exit"
+
+    if ($useDefaultTask.ToLower() -eq 'y') {
+      New-ImageTask($defaultTaskOption)
+      return
+    } else {
+      $selectedOption = Read-Host "`nSelect a number from the menu and hit enter or hit CTRL-C to exit`n"
+      New-ImageTask($selectedOption)
+      return
+    }
+  }
+
+  $selectedOption = Read-Host "`nSelect a number from the menu and hit enter or hit CTRL-C to exit`n"
   New-ImageTask($selectedOption)
 }
 
 function New-ImageTask($selectedOption) {
+
+  if($selectedOption -match '\d' -ne 1) {
+    Write-Host "`nInvalid option. Choose a number from the menu." -ForegroundColor DarkRed
+    Get-TasksMenuForDevice
+    return
+  }
 
   if($taskCollection[[int]$selectedOption] -eq "Capture Image") {
     New-CaptureImageTask
     exit
   }
 
-  if($selectedOption -match '\d' -ne 1) {
-    Write-Host "Invalid option. Invalid option. Choose a number from the menu." -ForegroundColor DarkRed
-    Get-TasksMenuForDevice
-    return
-  }
-
   $taskName = $taskCollection[[int]$selectedOption]
 
   if([string]::IsNullOrWhiteSpace($taskName)){
-    Write-Host "Invalid option. Choose a number from the menu." -ForegroundColor DarkRed
+    Write-Host "`nInvalid option. Choose a number from the menu." -ForegroundColor DarkRed
     Get-TasksMenuForDevice
     return
   }
@@ -247,7 +278,7 @@ function Test-ManifestForModel{
     Write-Host "`n[ Warning: Machine model not found in manifest. ]" -ForegroundColor DarkYellow
     0
   } else {
-    Write-Host "`n[ Found Machine model in manifest. Tasks in " -ForegroundColor DarkYellow -NoNewline; Write-Host "yellow" -ForegroundColor Yellow -NoNewline; Write-Host " are recommended for this device. ]`n" -ForegroundColor DarkYellow
+    Write-Host "`n[ Found Machine model in manifest. Tasks in " -ForegroundColor DarkYellow -NoNewline; Write-Host "yellow" -ForegroundColor Yellow -NoNewline; Write-Host " are recommended for this device. ]" -ForegroundColor DarkYellow
     1
   }
 }
