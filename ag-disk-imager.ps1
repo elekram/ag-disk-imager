@@ -150,7 +150,7 @@ function New-ImageTask($selectedOption) {
   }
   Set-BootLoader
   Get-MachineSerialNumber
-  Write-Host "`n[ >> $taskName completed <<]" -ForegroundColor Magenta
+  Write-Host "`n[ >> Task: $taskName completed <<]" -ForegroundColor Magenta
 }
 
 function New-CaptureImageTask {
