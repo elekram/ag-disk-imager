@@ -278,7 +278,9 @@ function Test-ManifestForModel{
     Write-Host "`n[ Warning: Machine model not found in manifest. ]" -ForegroundColor DarkYellow
     0
   } else {
-    Write-Host "`n[ Found Machine model in manifest. Tasks in " -ForegroundColor DarkYellow -NoNewline; Write-Host "yellow" -ForegroundColor Yellow -NoNewline; Write-Host " are recommended for this device. ]" -ForegroundColor DarkYellow
+    Write-Host "`n[ Found Machine model in manifest. Tasks in " -ForegroundColor DarkYellow -NoNewline; 
+    Write-Host "yellow" -ForegroundColor Yellow -NoNewline; 
+    Write-Host " are recommended for this device. ]" -ForegroundColor DarkYellow
     1
   }
 }
