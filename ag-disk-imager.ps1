@@ -201,8 +201,7 @@ function New-CaptureImageTask {
       $readableSize = "$size GB" 
       Write-Host "[$counter] " $_.DriveLetter $_.FileSystem $readableSize $_.HealthStatus $_.FileSystemLabel -ForegroundColor DarkGray
       $counter++  
-    }
-    
+    } 
   }
 
   do {
