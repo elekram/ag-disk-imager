@@ -291,7 +291,7 @@ function Set-BootLoader {
 function Get-MachineModel {
   Write-Host "`n[ Retrieving computer model... ]" -ForegroundColor Cyan
   $script:machineModel = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty 'Model'
-  Write-Host "`n[ >> Found machine model: $script:machineModel << ]" -ForegroundColor Yellow
+  Write-Host "`n[ >> Machine model: $script:machineModel << ]" -ForegroundColor Yellow
 }
 
 function Get-MachineSerialNumber {
