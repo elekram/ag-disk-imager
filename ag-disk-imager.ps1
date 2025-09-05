@@ -276,19 +276,18 @@ function Set-BootLoader {
     return
   }
 
-  if ($firmwareType -ne 'Uefi') {
-    try {
-      Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
-      Clear-BootLoaderEntries
-    }
-    catch {
-      Write-Host "`n[ >> No entries found << ]" -ForegroundColor Yellow
-    }
-    
-    $biosCommand = 'bcdboot w:\windows /s w: /f BIOS'
-    Invoke-Expression $biosCommand
-    return
+  
+  try {
+    Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
+    Clear-BootLoaderEntries
   }
+  catch {
+    Write-Host "`n[ >> No entries found << ]" -ForegroundColor Yellow
+  }
+    
+  $biosCommand = 'bcdboot w:\windows /s w: /f BIOS'
+  Invoke-Expression $biosCommand
+  return
 }
 
 function Get-MachineModel {
