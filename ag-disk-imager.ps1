@@ -276,7 +276,6 @@ function Set-BootLoader {
     return
   }
 
-  
   try {
     Write-Host "`n[ Checking Windows BootLoader for stale entries... ]" -ForegroundColor Cyan
     Clear-BootLoaderEntries
