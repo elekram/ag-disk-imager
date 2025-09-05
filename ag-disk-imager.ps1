@@ -286,7 +286,6 @@ function Set-BootLoader {
     
   $biosCommand = 'bcdboot w:\windows /s w: /f BIOS'
   Invoke-Expression $biosCommand
-  return
 }
 
 function Get-MachineModel {
