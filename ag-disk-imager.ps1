@@ -606,7 +606,7 @@ function Show-ApplicationTitle {
   bug ;     "-,/_..--"`-..__)
       '""--.._:
 
-[ https://github.com/telekram/ag-disk-imager ]
+[ https://github.com/elekram/ag-disk-imager ]
 "@
 
   write-host ' '
